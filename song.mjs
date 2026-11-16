@@ -70,7 +70,9 @@ export function validFinalDraft(state,notes) {
 }
 export function compatibleSave(saved) {
   if(!saved||typeof saved!=='object'||Array.isArray(saved)||saved.v!==1||!Number.isInteger(saved.stage)||saved.stage<1||saved.stage>5)return false;
-  if(Object.keys(saved).some(k=>!['v','stage','who','state','completedStages','performances','candles','cakeReady','incentive','finalDraft','sound','together','fullscreenPreference','autoMove','songHits','nextStage','playedToday'].includes(k)))return false;
+  if(Object.keys(saved).some(k=>!['v','stage','who','state','completedStages','performances','candles','cakeReady','incentive','finalDraft','sound','together','fullscreenPreference','autoMove','songHits','nextStage','playedToday','volume','panelTheme'].includes(k)))return false;
+  if(saved.volume!=null&&!(typeof saved.volume==='number'&&saved.volume>=0.2&&saved.volume<=1))return false;
+  if(saved.panelTheme!=null&&!['auto','light','dark'].includes(saved.panelTheme))return false;
   if(saved.playedToday!=null&&!validPlayedToday(saved.playedToday))return false;
   if(saved.autoMove!=null&&typeof saved.autoMove!=='boolean')return false;
   if(saved.songHits!=null&&!validSongHits(saved.songHits))return false;
