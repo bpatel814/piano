@@ -1,334 +1,207 @@
 <!doctype html><html lang="en"><head><link rel="icon" href="data:,"><link rel="preload" as="image" href="./art/valley/bg_shared_layer0.webp"><link rel="preload" as="image" href="./art/valley/bg_map_layer1.webp"><link rel="preload" as="image" href="./art/valley/bg_map_layer2.webp"><link rel="preload" as="image" href="./art/valley/cake.webp"><link rel="preload" as="image" href="./art/valley/characters_family_child1_card.webp"><link rel="preload" as="image" href="./art/valley/family_adult1_idle.webp"><link rel="preload" as="image" href="./art/valley/family_adult2_idle.webp"><link rel="preload" as="image" href="./art/valley/family_grandpa_idle.webp"><meta name="color-scheme" content="only light"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta charset="utf-8"><title>Birthday Piano</title><style>
-:root{color-scheme:light}body{margin:0;background:#f9f2e9;color:#433d50;font:18px system-ui;text-align:center}main{max-width:1000px;margin:auto;padding:1rem}h1{font-size:1.5rem}@keyframes sway{0%,100%{transform:rotate(0)}50%{transform:rotate(5deg)}}.friend.celebrate{animation:sway 1s ease-in-out 1}@media(prefers-reduced-motion:reduce){.friend.celebrate{animation:none}}.cake-art{display:block;width:150px;height:66px;margin:0 auto}#candles button{border:0;background:transparent;font-size:1.55rem;letter-spacing:.2rem;color:#a96c46}.keyboard-window{position:relative;overflow-x:auto;overscroll-behavior-x:contain}.piano{position:relative;min-width:688px;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;height:min(47vh,300px);touch-action:none}.key{border:2px solid #777;border-radius:0 0 16px 16px;min-width:0;background:var(--c);color:#252438;font-size:clamp(20px,4vw,34px);touch-action:none;user-select:none}.key.hint{box-shadow:inset 0 0 0 6px #fff8a8}.key.look{box-shadow:inset 0 0 0 3px #fff8a8}.key:active{transform:scale(.96)}.key.lit{filter:brightness(1.07)}.status{min-height:2em}button{cursor:pointer}.controls button,#left,#right,#candles button{min-width:48px;min-height:48px}.controls button svg{width:30px;height:30px;flex:none}#help img{width:48px;height:48px;object-fit:contain}.controls button{gap:.35rem;font-size:1rem;padding:.7rem 1rem;margin:.3rem}  @media(max-width:540px){main{padding:.5rem}.piano{height:43vh;gap:2px}.key{font-size:20px}}
+/* Birthday Piano: one layout system (redesign item 3, Nov 16 2026). Replaces about 40 stacked patch layers.
+   The screen is two bands: the party (who it is for, the cake) on top, the keys below. Three size classes:
+   phone landscape (height up to 500px), tablet landscape, portrait. Sizes come from the custom properties below.
+   Child surfaces are image art (Balk's Chrome force-darkens CSS colour fills); CSS supplies geometry and motion only. */
+:root{color-scheme:only light;--band:38vh;--edge:8px;--btn:64px}
+/* Derived sizes live on body so they follow body.cake-stage's bigger band. */
+body{--cake-h:calc(var(--band) * .82);--cake-w:calc(var(--cake-h) * 1.5);--guest-h:calc(var(--band) - 14px)}
+@media (orientation:landscape) and (min-height:501px){:root{--band:36vh;--edge:12px}body{--cake-h:calc(var(--band) * .78)}}
+@media (orientation:portrait){:root{--band:34vh}body{--cake-h:min(calc(var(--band) * .6),calc(52vw / 1.5));--guest-h:calc(var(--band) * .62)}}
+/* The ending: the party band grows, the keys shrink a little and stay fully visible and playable. */
+body.cake-stage{--band:50vh;--cake-h:calc(var(--band) - 22px)}
+@media (orientation:landscape) and (min-height:501px){body.cake-stage{--band:44vh;--cake-h:calc(var(--band) - 34px)}}
+@media (orientation:portrait){body.cake-stage{--band:40vh;--cake-h:min(calc(var(--band) * .66),calc(64vw / 1.5))}}
 
-body{background:radial-gradient(ellipse at 50% 0,#fff9ed,#f4e6da);color:#51475b}main{padding:max(.6rem,env(safe-area-inset-top)) .75rem 1rem}h1{margin:.35rem;font-size:clamp(1.3rem,4vw,2rem)}.topbar{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;gap:.35rem;padding:.25rem;background:#fff8efed;border-radius:20px}.topbar h1{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.topbar a,.topbar button,.controls button,.controls summary,#left,#right{box-sizing:border-box;min-height:64px;min-width:64px;border:0;border-radius:22px;background:#fff9ef;color:#55465d;padding:.6rem 1rem;box-shadow:0 4px 0 #d7c0bd;font:600 1rem system-ui;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.topbar a{background:#dfeddc}.topbar a svg,.topbar button svg{width:30px;height:30px;flex:none}.controls button:focus-visible,.topbar a:focus-visible,.topbar button:focus-visible,.key:focus-visible{outline:3px solid #785c94}.piano{gap:7px}.hand-cue{position:absolute;left:22px;bottom:12%;width:44px;height:44px;pointer-events:none;opacity:0}.hand-cue.demonstrate{animation:demoHand 2.4s ease-in-out 2 both}.hand-cue[hidden]{display:none}.hand-cue svg{width:100%;height:100%}@keyframes demoHand{0%,100%{opacity:0;transform:translateY(0)}20%,70%{opacity:.8}45%{transform:translateY(7px)}}.key{border:0;border-radius:18px 18px 25px 25px;box-shadow:inset 0 -8px 0 #00000015,0 4px 0 #bfaeb3;transition:transform 200ms ease,filter 200ms ease;touch-action:none}.key:active{transform:scale(.96);outline:none}.key.lit{filter:brightness(1.07)}.cake-art{border:0;box-shadow:none}.friend{display:flex;align-items:center;justify-content:center;margin:.35rem auto;width:88px;height:88px}.friend img{width:100%;height:100%;object-fit:contain}#key-cue{min-height:1.3em;margin:.25em}#candles button{min-width:64px;min-height:64px}#candles svg{width:30px;height:58px}#candles button:disabled{cursor:default;opacity:1}#candles.help,.controls button.help{outline:4px solid #e6bd75;border-radius:18px}.status{margin:.3rem}#stage-pictures{display:flex;justify-content:center;flex-wrap:wrap;gap:.4rem}#stage-pictures button{min-width:64px;min-height:64px}#stage-pictures button[aria-pressed="true"]{box-shadow:0 0 0 4px #a187af,0 4px 0 #d7c0bd}.stage-icon{display:block;font-size:1.7rem}#birthday-pictures{display:flex;justify-content:center;gap:.4rem;flex-wrap:wrap}#birthday-pictures button{width:64px;height:64px;border:0;border-radius:50%;background:#f6e0df;box-shadow:0 4px 0 #dcc2be;font-size:1.7rem}#birthday-pictures button[aria-pressed="true"]{box-shadow:0 0 0 4px #9e81a6,0 4px 0 #dcc2be}details{margin:.5rem auto;max-width:32rem}summary{cursor:pointer}select,input{font:inherit;min-height:64px;border:0;border-radius:16px;background:#fff9ef;color:#51475b;padding:.5rem}.controls{padding-bottom:env(safe-area-inset-bottom)}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.hand-cue.demonstrate{opacity:.8}}@media(orientation:landscape) and (max-height:500px){.play-area{display:grid;grid-template-columns:minmax(0,1fr) 256px;gap:4px 12px;align-items:start}.play-area #cake{grid-column:2;grid-row:1 / span 3}.play-area .keyboard-window{grid-column:1;grid-row:1}.play-area #key-cue{grid-column:1;grid-row:2}.play-area .scroll-controls{grid-column:1;grid-row:3}.play-area .piano{height:clamp(150px,43vh,220px)}#birthday-pictures{margin-bottom:.25rem}}@media(max-width:540px){.piano{height:clamp(150px,38vh,280px)}.topbar h1,.topbar a span,.topbar button span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.topbar a,.topbar button{padding:.4rem;font-size:.75rem}}
+html,body{margin:0;height:100%;overflow:hidden;background:#e6f4ff;color:#4a3b34;font:18px system-ui,sans-serif;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+[hidden]{display:none!important}
+img{user-select:none;-webkit-user-drag:none}
+button{font:inherit;color:inherit;cursor:pointer}
+main{position:fixed;inset:0;margin:0;padding:0}
+.valley-backdrop{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.valley-backdrop img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+/* Text the child never needs stays in the page for screen readers only. */
+.scroll-controls{display:none!important}
+.topbar h1,.topbar span,.topbar svg,#key-cue,#lyrics,.status,#who,label[for="who"]{position:absolute!important;width:1px;height:1px;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#friend{display:none}  /* Pip lives on the first key; the sky Pip had no job. */
 
-/* v8 picture-book stage. The full button rectangles remain the hit targets. */
-[hidden]{display:none!important}html,body{margin:0;min-height:100%;overflow:hidden}img{user-select:none;-webkit-user-drag:none}body,body:where(*){background:#f7edd4 url('./art/v8/meadow.webp') center center/cover no-repeat fixed}main{position:relative;box-sizing:border-box;width:100%;max-width:none;height:100dvh;padding:0;overflow:hidden}.topbar{position:absolute;inset:8px 10px auto;z-index:40;display:flex;justify-content:flex-end;gap:8px;padding:0;background:none}.topbar h1,.topbar span,.topbar svg{display:none!important}.topbar a,.topbar button{display:block;position:relative;width:64px;height:64px;min-width:64px;min-height:64px;padding:0;border:0;border-radius:0;box-shadow:none;background:transparent center/contain no-repeat}.topbar a{margin-right:auto;background-image:url('./art/v8/home.webp')}.topbar #mute{background-image:url('./art/v8/sound.webp')}.topbar #mute[aria-pressed="true"]{filter:grayscale(1);opacity:.65}.topbar #stages{width:48px;height:48px;min-width:48px;min-height:48px;background-image:url('./art/v8/parent.webp')}.topbar #help{display:none}.play-area{position:absolute;left:3%;right:3%;top:16%;bottom:7%;display:grid;grid-template-columns:minmax(512px,1fr) 256px;gap:8px;align-items:center}.play-area #cake{position:relative;grid-column:2;grid-row:1;width:100%;height:82%;align-self:center}.cake-art{position:absolute;width:180%;height:100%;left:-40%;top:0;object-fit:contain;margin:0}#candles{position:absolute;z-index:2;left:0;right:0;top:2%;height:44%;display:grid;grid-template-columns:repeat(4,1fr)}#candles button{padding:0;border:0;background:transparent;min-width:64px;min-height:64px;overflow:visible}#candles button img{width:150%;height:150%;margin:-25%;object-fit:contain}#candles button:disabled{opacity:1}.play-area .keyboard-window{grid-column:1;grid-row:1;width:100%;height:100%;overflow:hidden;background:transparent url('./art/v8/frame.webp') center/100% 100% no-repeat}.piano,.play-area .piano{box-sizing:border-box;padding:10% 3%;width:100%;min-width:0;height:100%;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:0}.key{position:relative;overflow:hidden;min-width:0;border:0;padding:0;background:transparent!important;box-shadow:none;border-radius:0;touch-action:none}.key img{display:block;position:relative;left:-19%;width:138%;height:100%;object-fit:fill;pointer-events:none}.key:active{transform:translateY(4%)}.key.hint{box-shadow:none;filter:brightness(1.1) drop-shadow(0 0 10px #fff5b4)}.key.look{box-shadow:none;filter:brightness(1.04) drop-shadow(0 0 5px #fff5b4)}.key.lit{filter:brightness(1.16) drop-shadow(0 0 8px #fff6c8)}.hand-cue{width:68px;height:68px;bottom:14%;z-index:4}.hand-cue img{width:100%;height:100%;object-fit:contain}#friend{pointer-events:none;position:absolute;width:clamp(60px,12vw,110px);height:clamp(60px,12vw,110px);right:1%;bottom:0;z-index:3}.scroll-controls,#path,#key-cue,#lyrics,.status,main>p{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important}.controls{padding:0}.controls details:not([open]){display:none}.controls details[open]{position:fixed;z-index:60;inset:6%;max-width:none;overflow:auto;margin:0;padding:20px;border-radius:24px;background:#fff9ee;box-shadow:0 8px 32px #58433d66;text-align:center}.controls details[open] button,.controls details[open] summary{display:inline-flex}.controls #again{position:fixed;z-index:41;top:8px;bottom:auto;left:82px;width:64px;height:64px;padding:0;border:0;box-shadow:none;background:transparent url('./art/v8/again.webp') center/contain no-repeat}.controls #again svg,.controls #again span{display:none}#stage-pictures button{width:130px;height:140px;min-width:64px;min-height:64px;background:transparent;border:0;box-shadow:none;padding:2px;display:inline-flex;flex-direction:column}#stage-pictures button img{width:100%;height:76%;object-fit:contain}#stage-pictures button span{font-size:.8rem}#birthday-pictures{display:none}body.choosing #birthday-pictures{position:fixed;z-index:35;inset:0;display:flex;align-items:center;justify-content:center;gap:1%;padding:75px 3% 20px;box-sizing:border-box;background:#f7edd4 url('./art/v8/meadow.webp') center/cover no-repeat}#birthday-pictures button{flex:1 1 0;max-width:180px;width:auto;height:min(45vh,180px);min-width:64px;min-height:64px;border:0;border-radius:0;padding:0;background:transparent;box-shadow:none}#birthday-pictures button img{width:100%;height:100%;object-fit:contain}#birthday-pictures button[aria-pressed="true"]{box-shadow:none}body.choosing .play-area,body.choosing #friend,body.choosing #again{visibility:hidden}body:not(.choosing) #birthday-pictures{display:none}@media(prefers-color-scheme:dark){.controls details[open]{background:#34303e;color:#fff}}@media(orientation:portrait){.play-area{left:3%;right:3%;top:22%;bottom:12%;grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) 28%;gap:0}.play-area .keyboard-window{grid-column:1;grid-row:1}.play-area #cake{grid-column:1;grid-row:2;height:100%;width:min(65%,260px);justify-self:center}#friend{width:70px;height:70px}body.choosing #birthday-pictures{flex-wrap:wrap;gap:0;padding:80px 5% 5%}#birthday-pictures button{flex:0 0 32%;height:26vh}}@media(prefers-reduced-motion:reduce){.key{transition:none!important}}
-
-/* v9: picture-book playtest adjustments */
-#candles{left:10%;right:10%;top:17%;height:35%}#candles button{min-width:0} #candles button img{width:125%;height:125%;margin:-12.5%} #candles button[data-lit="true"] img{filter:drop-shadow(0 0 8px #ffd77b)}
-.play-area{left:3%;right:3%;top:20%;bottom:9%;grid-template-columns:minmax(512px,1fr) 220px}.topbar a,.topbar #mute{border-radius:50%;background-color:#fff0cae8;box-shadow:0 2px 8px #80644b80}.topbar #stages{width:64px;height:64px;min-width:64px;min-height:64px;border-radius:50%;background-color:#fff0cae8;box-shadow:0 2px 8px #80644b80}.controls #again{display:none}#friend{right:3%;bottom:15%;width:80px;height:80px}.key.pressed img{animation:keyBounce .26s ease-out}.key.pressed{transform:translateY(4%)}@keyframes keyBounce{0%{transform:translateY(0)}40%{transform:translateY(5px) scaleY(.97)}75%{transform:translateY(-3px)}100%{transform:translateY(0)}}
-body.choosing #birthday-pictures{gap:0;padding:68px 1% 4px}#birthday-pictures button{max-width:220px;height:min(60vh,245px);animation:cardWiggle 4s ease-in-out infinite}#birthday-pictures button:nth-child(even){animation-delay:-2s}#birthday-pictures button.chosen{animation:cardHop .35s ease-out both}@keyframes cardWiggle{0%,85%,100%{transform:rotate(0)}90%{transform:rotate(-2deg)}95%{transform:rotate(2deg)}}@keyframes cardHop{50%{transform:translateY(-15px)}100%{transform:translateY(0)}}
-#cake.puff::after{content:"";position:absolute;left:38%;top:4%;width:24%;height:22%;border-radius:50%;background:radial-gradient(ellipse,#fffbe8b0,transparent 70%);animation:puffAway 1s ease-out both;pointer-events:none}@keyframes puffAway{from{opacity:.7;transform:translateY(0) scale(.6)}to{opacity:0;transform:translateY(-25px) scale(1.5)}}
-@media(prefers-reduced-motion:reduce){#birthday-pictures button,.key.pressed img,#cake.puff::after{animation:none!important}}
-
-/* v10: make the invitation to play visible */
-.topbar #stages{display:none} .topbar a{touch-action:manipulation}
-.play-area #cake{transform:scale(1.5);transform-origin:center center;z-index:2}.play-area .keyboard-window{z-index:3}#friend{z-index:4;right:2%;bottom:5%}
-body.choosing #birthday-pictures{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scrollbar-width:none;padding:70px 4% 8px;gap:8px}#birthday-pictures::-webkit-scrollbar{display:none}#birthday-pictures button{flex:0 0 238px;max-width:none;width:238px;height:min(72vh,290px);scroll-snap-align:center}
-.hand-cue{width:96px;height:96px;bottom:16%;z-index:9;filter:drop-shadow(0 3px 3px #80572c)}.hand-cue.demonstrate{animation:pawTap 1.5s ease-in-out infinite;opacity:1}@keyframes pawTap{0%,100%{transform:translateY(-8px)}50%{transform:translateY(7px)}}
-.key.cue-active{overflow:visible;z-index:6;animation:cueHalo 1.5s ease-in-out infinite}.key.cue-active::after{content:"";position:absolute;inset:0 6%;border:5px solid #fff0a5;border-radius:48px;box-shadow:0 0 14px 6px #ffd65fb5,inset 0 0 12px #fff0a5;pointer-events:none}@keyframes cueHalo{0%,100%{filter:brightness(1.06)}50%{filter:brightness(1.28) drop-shadow(0 0 9px #ffe58b)}}
-@media(prefers-reduced-motion:reduce){.key.cue-active,.hand-cue.demonstrate{animation:none!important;opacity:1}}
-
-/* v12: five visible choices and stronger child-sized cues */
-body.choosing #birthday-pictures{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));justify-content:stretch;gap:0;padding:64px 0 0;overflow:hidden}body.choosing #birthday-pictures button{min-width:0;width:100%;height:min(68vh,270px);max-width:none;scroll-snap-align:none}body.choosing #birthday-pictures button img{width:100%;height:100%;object-fit:contain}
-#candles{top:27%} .hand-cue{width:150px;height:150px;bottom:15%;filter:drop-shadow(0 3px 3px #80572c)}
-.key.cue-active{filter:brightness(1.12);animation:goldPulse 1.5s ease-in-out infinite}.key.cue-active::after{inset:-2px 4%;border:5px solid #fff4ce;border-radius:48px;box-shadow:0 0 8px 5px #ffe3a0,0 0 22px 11px #ffc86bba,inset 0 0 10px #fff8dc;pointer-events:none}@keyframes goldPulse{0%,100%{filter:brightness(1.04) drop-shadow(0 0 5px #ffd78a)}50%{filter:brightness(1.18) drop-shadow(0 0 13px #ffda8d)}}
-@media(prefers-reduced-motion:reduce){.key.cue-active{animation:none!important}}
-
-/* v13: the instrument accepts input throughout the picker fade. */
-body.choosing.selecting .play-area,body.choosing.selecting #friend{visibility:visible}body.choosing.selecting #birthday-pictures{pointer-events:none;opacity:0;transition:opacity .35s ease-out}
-.key.cue-active::after{border-color:#fff3cc;box-shadow:0 0 10px 5px #ffeab8,0 0 24px 12px #ffbf57dc,inset 0 0 12px #fff7df}.key.cue-active{animation:v13Gold 1.5s ease-in-out infinite}@keyframes v13Gold{0%,100%{filter:brightness(1.08) drop-shadow(0 0 6px #ffc665)}50%{filter:brightness(1.18) drop-shadow(0 0 14px #ffbe4b)}}
-@media(prefers-reduced-motion:reduce){.key.cue-active{animation:none!important}}
-
-/* Native Valley look: tokens, button treatment and verified original assets from v22. */
-body,body.choosing #birthday-pictures{background:#e6f4ff url('./art/valley/bg_map_layer2.webp') center/100% 100% no-repeat}body{background-image:url('./art/valley/bg_map_layer2.webp'),url('./art/valley/bg_map_layer1.webp'),url('./art/valley/bg_shared_layer0.webp');background-size:100% 100%;background-repeat:no-repeat}body.choosing #birthday-pictures{background:transparent}
-.topbar a,.topbar #mute{background-color:transparent;border:0;border-radius:50%;box-shadow:none}.topbar a{background-image:url('./art/valley/ui_home.webp')}.topbar #mute{background-image:url('./art/valley/ui_sound_on.webp')}
-.play-area .keyboard-window{background-image:url('./art/valley/frame.webp')}.key{background:var(--c)!important;border:4px solid #4a3b34;border-radius:18px;box-shadow:inset 0 -5px #4a3b341f,0 3px #4a3b3433;overflow:visible}.key img{position:absolute;left:4%;width:92%;height:55%;bottom:3%;object-fit:contain}#friend img{object-fit:contain}.hand-cue{width:70px;height:70px;bottom:20%}.hand-cue img{object-fit:contain}
-#birthday-pictures button{border:4px solid #4a3b34;border-radius:28px;background:#fffdf8eF;box-shadow:0 4px 0 #4a3b342e;margin:4px}body.choosing #birthday-pictures button{width:calc(100% - 8px);height:min(65vh,260px)}#birthday-pictures button img{padding:7%;object-fit:contain}
-.play-area #cake{transform:scale(1.3)}.cake-art{width:100%;height:85%;left:0;top:13%;object-fit:contain}#candles{left:14%;right:14%;top:4%;height:50%}#candles button img{width:100%;height:100%;margin:0;object-fit:contain}
-
-@media (orientation:portrait){
- .play-area{left:3%;right:3%;top:17%;bottom:5%;grid-template-columns:minmax(0,1fr);grid-template-rows:58% 42%;gap:0}
- .play-area .keyboard-window{grid-column:1;grid-row:1;height:100%}.play-area .piano{grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));padding:9% 5%;gap:2px}.key img{height:54%}
- .play-area #cake{grid-column:1;grid-row:2;width:min(56%,220px);height:95%;justify-self:center;transform:scale(1.05)}#friend{right:3%;bottom:5%}
- body.choosing #birthday-pictures{padding:72px 0 0}body.choosing #birthday-pictures button{height:min(34vh,250px)}
-}
-
-#candles button{position:relative}#candles button img.flame{position:absolute;width:22px;height:26px;left:50%;top:23%;margin:0;transform:translateX(-50%);object-fit:contain;filter:drop-shadow(0 0 6px #ffd56c)}
-
-@media (orientation:portrait){body{background-size:cover;background-position:center}body.choosing #birthday-pictures{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));align-content:center;padding:12vh 1% 8vh;gap:4px}body.choosing #birthday-pictures button{height:min(27vh,200px);width:calc(100% - 8px)}body.choosing #birthday-pictures button:nth-child(n+4){position:relative;left:50%}}
-
-/* Color Path: a still, illustrated next-note sequence, not a scrolling race. */
-#path.path-visible{position:fixed!important;z-index:8;top:12%!important;left:18%!important;width:auto!important;height:48px!important;clip-path:none!important;overflow:visible!important;margin:0!important;display:flex;gap:5px;align-items:center;pointer-events:none}#path .path-stone{box-sizing:border-box;width:48px;height:48px;border:3px solid #4a3b34;border-radius:50%;background:transparent center/cover no-repeat;box-shadow:0 2px 0 #4a3b3433;display:grid;place-items:center}#path .path-stone img{width:90%;height:90%;object-fit:contain}@media(orientation:portrait){#path.path-visible{top:10%!important;left:12%!important}}
-
-/* A discoverable grown-up entry, matching the Valley badge. */
-.topbar #stages{display:grid;place-items:center;background:#fffdf8;border:4px solid #4a3b34;border-radius:50%;box-shadow:0 4px 0 #4a3b342e;width:64px;height:64px;min-width:64px;min-height:64px;color:#4a3b34}.topbar #stages .parent-gear{display:block!important;font-size:32px;line-height:1}
-
-/* Playtest repair: explicit layered scenery and stable opaque targets in light/dark browsers. */
-html{color-scheme:only light}body{background:#e6f4ff!important;color-scheme:only light}.valley-backdrop{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:#e6f4ff}.valley-backdrop img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill}main{z-index:1}body.choosing #birthday-pictures{background:transparent!important}body.choosing #birthday-pictures button{box-sizing:border-box;margin:0;width:100%;background:#fffdf8!important;color-scheme:only light;forced-color-adjust:none}
-.key{forced-color-adjust:none;color-scheme:only light;background-image:none!important;border:4px solid #4a3b34!important;opacity:1!important}.key[data-note="G4"]{background-color:#bfe3ff!important}.key[data-note="A4"]{background-color:#b3aef0!important}.key[data-note="B4"]{background-color:#d9c7ff!important}.key[data-note="C5"]{background-color:#ffb3c8!important}.key[data-note="D5"]{background-color:#ffd3ab!important}.key[data-note="E5"]{background-color:#fff2a8!important}.key[data-note="F5"]{background-color:#b8f0d2!important}.key[data-note="G5"]{background-color:#9fd0ff!important}
-.play-area #cake{width:100%;height:auto;aspect-ratio:3/2;position:relative}.cake-art{position:absolute;inset:0;width:100%;height:100%;object-fit:fill}#candles{left:14%;right:14%;top:-20%;height:46%}
-.topbar #stages{display:grid;place-items:center;background:#fffdf8;border:4px solid #4a3b34;border-radius:50%;box-shadow:0 4px 0 #4a3b342e;width:64px;height:64px;min-width:64px;min-height:64px;color:#4a3b34}.topbar #stages svg{display:block!important;width:36px;height:36px}
-@media(orientation:portrait){.valley-backdrop img{object-fit:cover}.play-area #cake{width:min(56%,220px);height:auto}}
-#gate{box-sizing:border-box;min-width:90px;min-height:64px;border:3px solid #4a3b34;border-radius:18px;background:#fffdf8;color:#4a3b34;text-align:center;font-size:1.2rem}body.choosing #birthday-pictures{gap:0!important}body.choosing #path{display:none!important}
-/* Child surfaces stay light even when the parent prefers dark controls. */
-html { color-scheme: only light; }
-body.choosing #birthday-pictures { padding-left: 3vw; padding-right: 3vw; gap: 8px !important; }
-body.choosing #birthday-pictures button { position: relative; min-width: 0; }
-body.choosing #birthday-pictures button::after { content: ""; position: absolute; inset: 0 -4px; }
-@media (orientation: portrait) { body.choosing #birthday-pictures { padding-left: 3vw; padding-right: 3vw; } }
-#friend { right: 3%; bottom: 25%; z-index: 20; }
-@media (orientation: portrait) { #friend { right: 4%; bottom: 15%; } }
-/* Inactive piano accidentals are visual overlays, never input targets. */
-.accidental{position:absolute;z-index:12;box-sizing:border-box;border:3px solid #4a3b34;border-radius:0 0 12px 12px;background:#665365!important;box-shadow:inset 0 -4px #4a3b3433;pointer-events:none;}
-/* In portrait, break at B/C, where there is no accidental between keys. */
-@media (orientation:portrait){
- .play-area .piano{grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr))}
- .key:nth-child(1){grid-column:2;grid-row:1}.key:nth-child(2){grid-column:3;grid-row:1}.key:nth-child(3){grid-column:4;grid-row:1}
- .key:nth-child(4){grid-column:1;grid-row:2}.key:nth-child(5){grid-column:2;grid-row:2}.key:nth-child(6){grid-column:3;grid-row:2}.key:nth-child(7){grid-column:4;grid-row:2}.key:nth-child(8){grid-column:5;grid-row:2}
-}
-/* Keep the playable piano large; accidentals are quiet visual hints. */
-@media (orientation:landscape){
- .play-area{left:1%;right:1%;top:26%;bottom:2%;display:block}
- .play-area .keyboard-window{width:100%;height:100%}
- .play-area .piano{padding:1% 0;gap:0}
- .play-area #cake{position:fixed;top:1%;left:calc(50% - 84px);right:auto;width:88px;height:60px;transform:none;z-index:25}
- .play-area #cake.puff{transform:scale(1.8);transform-origin:top center}
- #friend{top:1%;right:28%;bottom:auto;width:60px;height:60px}
-}
-@media (orientation:portrait){.play-area{grid-template-rows:70% 30%}}
-
-/* Opaque artwork-backed pastels help keep the child surfaces bright; the parent panel may remain dark. */
-.key[data-note="G4"]{background-image:url("./art/pastels/G4.png")!important;background-size:100% 100%!important}
-.key[data-note="A4"]{background-image:url("./art/pastels/A4.png")!important;background-size:100% 100%!important}
-.key[data-note="B4"]{background-image:url("./art/pastels/B4.png")!important;background-size:100% 100%!important}
-.key[data-note="C5"]{background-image:url("./art/pastels/C5.png")!important;background-size:100% 100%!important}
-.key[data-note="D5"]{background-image:url("./art/pastels/D5.png")!important;background-size:100% 100%!important}
-.key[data-note="E5"]{background-image:url("./art/pastels/E5.png")!important;background-size:100% 100%!important}
-.key[data-note="F5"]{background-image:url("./art/pastels/F5.png")!important;background-size:100% 100%!important}
-.key[data-note="G5"]{background-image:url("./art/pastels/G5.png")!important;background-size:100% 100%!important}
-body.choosing #birthday-pictures button{background-image:url("./art/pastels/card.png")!important;background-size:100% 100%!important}
-.key[data-note="F5"] img{transform:scale(1.65);transform-origin:center bottom}
-
-/* Child-facing frames are raster artwork; CSS supplies geometry only. */
-.key{background-color:transparent!important;border:0!important;box-shadow:none!important}
-.key[data-note="G4"]{background-image:url("./art/pastels/G4-face.png")!important;background-size:100% 100%!important}
-.key[data-note="A4"]{background-image:url("./art/pastels/A4-face.png")!important;background-size:100% 100%!important}
-.key[data-note="B4"]{background-image:url("./art/pastels/B4-face.png")!important;background-size:100% 100%!important}
-.key[data-note="C5"]{background-image:url("./art/pastels/C5-face.png")!important;background-size:100% 100%!important}
-.key[data-note="D5"]{background-image:url("./art/pastels/D5-face.png")!important;background-size:100% 100%!important}
-.key[data-note="E5"]{background-image:url("./art/pastels/E5-face.png")!important;background-size:100% 100%!important}
-.key[data-note="F5"]{background-image:url("./art/pastels/F5-face.png")!important;background-size:100% 100%!important}
-.key[data-note="G5"]{background-image:url("./art/pastels/G5-face.png")!important;background-size:100% 100%!important}
-body.choosing #birthday-pictures button{background-color:transparent!important;background-image:url("./art/pastels/card-face.png")!important;background-size:100% 100%!important;border:0!important;box-shadow:none!important}
-.topbar #stages{background:transparent url("./art/pastels/parent-badge.png") center/contain no-repeat!important;border:0!important;box-shadow:none!important}.topbar #stages svg{display:none!important}
-
-.key[data-note="G4"],.key[data-note="A4"],.key[data-note="B4"],.key[data-note="C5"],.key[data-note="D5"],.key[data-note="E5"],.key[data-note="F5"],.key[data-note="G5"]{background-color:transparent!important}
-.accidental{background:transparent url("./art/pastels/accidental-face.png") center/100% 100% no-repeat!important;border:0!important;box-shadow:none!important}
-
-#firefly-jar{position:fixed;z-index:24;left:calc(50% + 25px);top:0;width:140px;height:140px;pointer-events:none}#firefly-jar img{width:100%;height:100%;object-fit:contain}#jar-lights{position:absolute;inset:0}.jar-light,.flying-firefly{position:absolute;width:22px;height:22px;background:transparent url("./art/valley/firefly-glow.webp") center/350% 350% no-repeat;pointer-events:none}.jar-light{transform:translate(-50%,-50%)}.flying-firefly{position:fixed;z-index:45;animation:fireflyFlight .5s ease-in-out forwards}@keyframes fireflyFlight{0%{transform:translate(0,0) scale(.8);opacity:.9}50%{transform:translate(calc(var(--dx)*.5),calc(var(--dy)*.5 - 28px)) scale(1.1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(.8);opacity:0}}body.choosing #firefly-jar{display:none}@media(orientation:portrait){#firefly-jar{left:calc(50% + 60px);top:auto;bottom:3%;width:125px;height:125px}}
-
-body.choosing @media(orientation:portrait){}
-
-/* Gentle invitation and one calm jar payoff; no flashing. */
-.key.cue-active.nudge{animation:gentlePoint .7s ease-in-out 1}@keyframes gentlePoint{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-#firefly-jar.jar-full{animation:jarSway 2s ease-in-out 1;filter:drop-shadow(0 0 8px #ffd875)}@keyframes jarSway{0%,100%{transform:rotate(0)}33%{transform:rotate(-5deg)}66%{transform:rotate(5deg)}}
-@media(prefers-reduced-motion:reduce){.key.cue-active.nudge,#firefly-jar.jar-full,.flying-firefly{animation:none!important}.flying-firefly{display:none}}
-/* Keep the reward beside the cake at the right, away from navigation. */
-@media (orientation:landscape){
- .play-area #cake{top:clamp(64px,16vh,88px);left:auto;right:1%;width:78px;height:54px}
- #firefly-jar{top:clamp(58px,14vh,80px);left:auto;right:calc(1% + 72px);width:108px;height:108px}
- #friend{right:2%;top:1%}
-}
-/* Keep the ending puff above the keys without scaling the cake over them. */
-body .play-area #cake.puff{transform:none}
-/* Child songbook appears only after a song is completed. */
-#child-free,#child-voice{position:fixed;z-index:42;top:8px;width:64px;height:64px;padding:3px;border:0;background:transparent url('./art/pastels/card-face.png') center/contain no-repeat;font-size:30px;cursor:pointer}#child-free{left:154px}#child-voice{left:226px}#child-free[hidden],#child-voice[hidden],body.choosing #child-free,body.choosing #child-voice{display:none!important}
-#child-book{position:fixed;z-index:42;left:82px;top:8px;width:64px;height:64px;padding:0;border:0;background:transparent url('./art/pastels/card-face.png') center/contain no-repeat;font-size:30px;cursor:pointer}body.choosing #child-book,body.choosing #child-shelf{display:none!important}#child-shelf{position:fixed;z-index:55;top:76px;left:5%;right:5%;display:flex;justify-content:center;gap:8px;pointer-events:auto}#child-shelf[hidden],#child-book[hidden]{display:none!important}#child-shelf button{width:68px;height:68px;padding:4px;border:0;background:transparent url('./art/pastels/card-face.png') center/100% 100% no-repeat}#child-shelf button img{width:100%;height:100%;object-fit:contain}
-/* Original Valley-style picture buttons, one image per control. */
-#child-free,#child-voice,#child-book{background-image:url('./art/valley/piano-controls.webp');background-size:300% 100%;color:transparent;font-size:0}
-#child-free{background-position:left center}#child-voice{background-position:center center}#child-book{background-position:right center}#child-voice::after{content:"";position:absolute;width:28%;height:28%;border:3px solid #623d22;border-radius:50%;box-shadow:0 0 0 3px #fff0a5,0 0 8px #ffe87e;pointer-events:none}#child-voice[data-tone="sine"]::after{left:34%;top:12%}#child-voice[data-tone="triangle"]::after{left:10%;top:52%}#child-voice[data-tone="bell"]::after{left:61%;top:52%}
-/* Keep the next-note identity accurate while advanced stages reveal help only when appropriate. */
-.key.cue-active.quiet-cue{animation:none!important;filter:none!important}.key.cue-active.quiet-cue::after{opacity:0;transition:opacity .35s ease-in-out}.key.cue-active.quiet-cue.hint::after{opacity:1}@media(prefers-reduced-motion:reduce){.key.cue-active.quiet-cue::after{transition:none}}
-
-/* Show a clear, illustrated mute state rather than only dimming the sound badge. */
-.topbar #mute[aria-pressed="true"]{background-image:url('./art/valley/ui_sound_off.webp')!important;filter:none;opacity:1}
-/* Invite the next candle tap without blocking it. */
-#candle-paw{position:absolute;z-index:5;top:38%;width:48px;height:48px;margin-left:-24px;object-fit:contain;pointer-events:none;animation:candleTap 20s ease-in-out infinite}@keyframes candleTap{0%,10%,100%{transform:translateY(0)}5%{transform:translateY(-5px)}}@media(prefers-reduced-motion:reduce){#candle-paw{animation:none}}
-/* Offer a clear replay after the candle moment is complete. */
-#child-again{position:fixed;z-index:42;left:24px;top:max(72px,calc(42% - 104px));width:96px;height:96px;padding:0;border:0;background:transparent url('./art/valley/play-again.webp') center/contain no-repeat}#child-again[hidden],body.choosing #child-again{display:none!important}@media(orientation:portrait){#child-again{left:50%;transform:translateX(-50%);top:calc(45% - 104px)}}
-/* Direct, picture-led sound choices appear only during free play. */
-#child-voice{display:none!important}#tone-choices{position:fixed;left:8px;top:calc(42% - 74px);z-index:42;display:flex;gap:4px}#tone-choices[hidden]{display:none!important}#tone-choices button{width:64px;height:64px;padding:0;border:0;border-radius:14px;background:transparent url('./art/valley/tone-choices.webp') left center/300% 100% no-repeat}#tone-choices button:nth-child(2){background-position:center}#tone-choices button:nth-child(3){background-position:right}#tone-choices button[aria-pressed="true"]{outline:3px solid #6b4834;outline-offset:1px}@media(orientation:portrait){#tone-choices{top:calc(45% - 74px)}}body.choosing #tone-choices{display:none!important}
-.key.replay-note{outline:5px solid #ffe49a;outline-offset:-5px;filter:brightness(1.15) drop-shadow(0 0 7px #ffe49a)!important}
-/* A picture invitation connects the cake to choosing a person. */
-#picker-invite{display:none;position:fixed;z-index:37;top:65px;left:50%;transform:translateX(-50%);width:160px;height:100px;padding:0;border:0;background:transparent}body.choosing #picker-invite{display:block}body.choosing.selecting #picker-invite{visibility:hidden;pointer-events:none}#picker-invite img:first-child{width:100%;height:100%;object-fit:contain}body.choosing #birthday-pictures{padding-top:130px}body.choosing #birthday-pictures button{height:min(50vh,220px)}@media(orientation:portrait){body.choosing #birthday-pictures{padding-top:150px}body.choosing #birthday-pictures button{height:min(25vh,220px)}}body.choosing #birthday-pictures button{transition:filter .3s ease-in-out}body.choosing #birthday-pictures button.picker-hint{filter:drop-shadow(0 0 8px #eab44b) drop-shadow(0 0 4px #ffd970)}@media(prefers-reduced-motion:reduce){body.choosing #birthday-pictures button{transition:none}}
-/* Give earned song stickers a coherent picture-book shelf. */
-#child-shelf{left:50%;right:auto;top:75px;transform:translateX(-50%);width:min(440px,94vw);height:96px;padding:10px 18px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:4px;background:transparent url('./art/valley/songbook-shelf.webp') center/100% 100% no-repeat}#child-shelf button{flex:0 0 64px;width:64px;height:64px}
-body.book-open .play-area #cake,body.book-open #firefly-jar,body.book-open #birthday-guest{visibility:hidden}
-/* Keep the selected birthday person visible next to the reward. */
-#birthday-guest{position:fixed;z-index:24;top:80px;right:calc(10% + min(260px,64vw) + 8px + clamp(70px,11vh,100px) + 8px);width:80px;height:80px;background:transparent url('./art/pastels/card-face.png') center/contain no-repeat;pointer-events:none}#birthday-guest-art{width:85%;height:85%;object-fit:contain}#birthday-guest .guest-cake{position:absolute;width:36%;height:36%;right:0;bottom:0;object-fit:contain}body.choosing #birthday-guest{display:none}@media(orientation:portrait){#birthday-guest{left:3%;right:auto;top:calc(88px + clamp(76px,21vh,140px));width:128px;height:128px}}#birthday-guest.guest-dear{filter:drop-shadow(0 0 8px #ffd875)}#birthday-guest.guest-celebrate{animation:guestSway 1.6s ease-in-out 1}@keyframes guestSway{0%,100%{transform:rotate(0)}33%{transform:rotate(-4deg)}66%{transform:rotate(4deg)}}@media(prefers-reduced-motion:reduce){#birthday-guest.guest-celebrate{animation:none}}
-/* Keep Pip in the scenery, clear of keys and controls. */
-#friend{position:fixed;left:28%;top:max(72px,min(23vh,170px));right:auto;bottom:auto;width:clamp(48px,7vw,70px);height:clamp(48px,7vw,70px);pointer-events:none}
-/* Reserve a stable reward row and keep the instrument below it. */
-@media (orientation:landscape){.play-area{top:42%;bottom:2%;left:1%;right:1%;display:block}.play-area .keyboard-window{width:100%;height:100%}}
-@media (orientation:portrait){.play-area{top:45%;bottom:2%;left:1%;right:1%;display:block}.play-area .keyboard-window{width:100%;height:100%}}
-.play-area #cake{position:fixed;top:80px;right:10%;left:auto;z-index:25;width:min(260px,64vw);height:clamp(76px,21vh,140px);transform:none;aspect-ratio:auto}
-#firefly-jar{position:fixed;top:80px;bottom:auto;left:auto;right:calc(10% + min(260px,64vw) + 8px);width:clamp(70px,11vh,100px);height:clamp(70px,11vh,100px)}
-#candles{left:0;right:0;top:-8%;height:58%}
-#candles button{min-width:0;min-height:64px}
-/* Keep the ending puff above the keys without scaling the cake over them. */
-body .play-area #cake.puff{transform:none}
-
-/* Portrait remains a real left-to-right keyboard: one row, no wrapped notes. */
-@media (orientation:portrait){
- .play-area .piano{grid-template-columns:repeat(8,minmax(0,1fr))!important;grid-template-rows:minmax(0,1fr)!important;padding:1% 0!important;gap:0!important}
- .play-area .piano .key:nth-child(n){grid-column:auto!important;grid-row:1!important}
- body{--portrait-cake:clamp(200px,32vw,260px)}
- .play-area #cake{left:auto;right:3%;width:var(--portrait-cake)}
- #firefly-jar{left:auto;right:calc(3% + var(--portrait-cake) + 4px);top:80px;bottom:auto;width:64px;height:64px}
- #birthday-guest{left:auto;right:calc(3% + var(--portrait-cake) + 72px);top:80px;width:64px;height:64px}
-}
-/* On very short landscape screens, keep the reward row above the piano. */
-@media (orientation:landscape) and (max-height:359px){
- .play-area #cake{top:72px;right:10%;width:156px;height:46px}
- #firefly-jar{top:72px;right:calc(10% + 162px);width:52px;height:52px}
- #birthday-guest{top:72px;right:calc(10% + 220px);width:52px;height:52px}
- #candle-paw{top:20%;width:36px;height:36px}
-}
-/* A steady badge signals sound trouble without changing mute state. */
-.topbar #mute.sound-fault::after{content:"!";position:absolute;right:-2px;top:-2px;width:22px;height:22px;border-radius:50%;background:#fff1bb;color:#633e27;border:2px solid #633e27;font:bold 17px/22px system-ui;text-align:center}
-/* Put the reward in the open sky on larger screens; preserve short-phone layout. */
-@media (min-width:700px) and (min-height:600px){
- .play-area #cake{left:calc(50% - 55px);right:auto;top:90px;width:300px;height:170px}
- #firefly-jar{left:calc(50% - 210px);right:auto;top:96px;width:145px;height:145px}
- #friend{left:16%;top:145px}
-}
-/* The child screen keeps the cake and jar as its reward, without a loose portrait. */
-
-/* Keep Rayna's art within her F key instead of crossing F-sharp. */
-.key[data-note="F5"] img{left:-34%;width:155%;height:52%;bottom:0;transform:none;transform-origin:center bottom;clip-path:inset(0 14% 0 22%)}
-/* Keep Rayna within her key while she gently bounces. */
-.key[data-note="F5"].pressed img{animation:raynaBounce .26s ease-out}
-@keyframes raynaBounce{0%,100%{transform:translateY(0)}40%{transform:translateY(5px) scaleY(.97)}75%{transform:translateY(-3px)}}
-
-/* A baked-in warm flame, gently moving without flashing. */
-.candle-smoke{position:absolute;z-index:5;top:-18%;width:12px;height:20px;border:2px solid #ede5d4;border-right-color:transparent;border-bottom-color:transparent;border-radius:50%;pointer-events:none;animation:smokeCurl .9s ease-out forwards}
-@keyframes smokeCurl{from{opacity:.65;transform:translateY(0) rotate(0)}to{opacity:0;transform:translateY(-18px) rotate(35deg)}}
-@media(prefers-reduced-motion:reduce){.candle-smoke{animation:none;display:none}}
-#candles button{position:relative;overflow:visible}
-#candles button img.reward-flame{position:absolute;left:50%;top:-29%;width:80%;height:70%;margin:0;object-fit:contain;transform:translateX(-50%);transform-origin:50% 80%;pointer-events:none;animation:rewardFlameSway 1.3s ease-in-out infinite}
-@keyframes rewardFlameSway{0%,100%{transform:translateX(-50%) rotate(-3deg)}50%{transform:translateX(-50%) rotate(3deg)}}
-@media(prefers-reduced-motion:reduce){#candles button img.reward-flame{animation:none!important}}
-@media (orientation:landscape) and (max-height:420px){.play-area #cake{top:80px;right:10%;width:100px;height:auto;aspect-ratio:3/2}#candles{top:-15%;height:45%;left:10%;right:10%}#candles button{min-height:0;height:100%}#firefly-jar{top:80px;right:calc(10% + 108px);width:52px;height:52px}}
-
-/* Strengthen the active key without revealing hidden-hint stages. */
-#keys:has(.key.cue-active:not(.quiet-cue)) > .key:not(.cue-active){filter:grayscale(10%) brightness(.94);transition:filter 300ms ease-in-out}
-#keys > .key.cue-active:not(.quiet-cue)::after{border-width:7px;box-shadow:0 0 12px 6px #fff0bd,0 0 25px 12px #ffcd70cc,inset 0 0 12px #fff8df}
-@media(prefers-reduced-motion:reduce){#keys > .key{transition:none!important}}
-
-/* Larger landscape screens: make the instrument dominant with a safe bottom margin. */
-@media (orientation:landscape) and (min-height:600px){
- .play-area{top:36%;bottom:3%;left:1%;right:1%}
- .play-area #cake{top:72px;left:calc(50% - 25px);right:auto;width:220px;height:auto;aspect-ratio:3/2}
- #firefly-jar{top:76px;left:calc(50% - 145px);right:auto;width:100px;height:100px}
- #candles button{min-height:0;height:100%}
-}
-
-/* Expose the frame rails rather than covering them with the keys. */
-@media (orientation:landscape) and (min-height:600px){
- .play-area .piano{padding:clamp(34px,6vh,55px) 9%}
-}
-
-/* The ending (P02). Defined once, here: after the last note the cake is the centre of the screen,
-   each candle is at least 64x64, and nothing else can be touched above it. Keys stay playable below. */
-.topbar{pointer-events:none}.topbar>*{pointer-events:auto}
-body{--cake-h:max(186px,46vh);--cake-w:calc(var(--cake-h) * 1.5)}
-@media (orientation:landscape) and (min-height:600px){body{--cake-h:max(186px,calc(36vh - 30px))}}
-@media (orientation:portrait){body{--cake-h:min(40vh,calc(60vw / 1.5))}}
-body.cake-stage .play-area #cake{position:fixed;z-index:45;top:max(6px,1.5vh);left:calc(50% - var(--cake-w) / 2);right:auto;bottom:auto;width:var(--cake-w);height:var(--cake-h);transform:none;aspect-ratio:auto}
-body.cake-stage .play-area #cake .cake-art{position:absolute;inset:auto 0 0 0;width:100%;height:78%;object-fit:contain}
-body.cake-stage #candles{position:absolute;left:4%;right:4%;top:0;height:46%;display:flex;gap:0}
-body.cake-stage #candles button{flex:1 1 0;min-width:64px;min-height:64px;height:100%;padding:0;margin:0}
-body.cake-stage #candles button img{width:100%;height:100%;object-fit:contain}
-body.cake-stage #candles button img.reward-flame{top:-26%;width:60%;height:52%}
-body.cake-stage #candle-paw{top:46%;width:clamp(44px,8vh,72px);height:clamp(44px,8vh,72px);margin-left:calc(clamp(44px,8vh,72px) / -2)}
-body.cake-stage #firefly-jar{top:max(6px,1.5vh);left:calc(50% - var(--cake-w) / 2 - min(14vh,110px) - 6px);right:auto;bottom:auto;width:min(14vh,110px);height:min(14vh,110px)}
-body.cake-ready .topbar a,body.cake-ready #stages,body.cake-ready #help,body.cake-ready #child-free,body.cake-ready #child-book,body.cake-ready #child-shelf{visibility:hidden;opacity:0;pointer-events:none}
-
-/* P09: hold-to-activate ring for Home and the gear; the gear is quieter than the child's buttons. */
-.topbar a,.topbar #stages{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:none}
+/* ---- Corners: Home top-left; sound and the quiet gear top-right; free play and songbook beside them. ---- */
+.topbar{position:fixed;z-index:56;inset:var(--edge) var(--edge) auto;height:var(--btn);pointer-events:none}
+.topbar>*{pointer-events:auto}
+.topbar a,.topbar button,#child-free,#child-book{position:absolute;top:0;box-sizing:border-box;width:var(--btn);height:var(--btn);padding:0;border:0;border-radius:50%;background:transparent center/contain no-repeat;box-shadow:none}
+.topbar a{left:0;background-image:url('./art/valley/ui_home.webp')}
+.topbar #mute{right:0;background-image:url('./art/valley/ui_sound_on.webp')}
+.topbar #mute[aria-pressed="true"]{background-image:url('./art/valley/ui_sound_off.webp')}
+.topbar #stages{right:calc(var(--btn) + 6px);top:8px;width:48px;height:48px;background-image:url('./art/pastels/parent-badge.png');opacity:.6}
+.topbar #help{display:none}
+#child-free,#child-book{position:fixed;z-index:42;top:var(--edge);color:transparent;font-size:0;background-image:url('./art/valley/piano-controls.webp');background-size:300% 100%;border-radius:14px}
+#child-free{right:calc(var(--edge) + var(--btn) + 60px);background-position:left center}
+#child-book{right:calc(var(--edge) + var(--btn) * 2 + 66px);background-position:right center}
+#child-voice{display:none!important}
+#tone-choices{position:fixed;z-index:42;top:calc(var(--edge) + var(--btn) + 8px);right:var(--edge);display:flex;gap:6px}
+#tone-choices button{width:var(--btn);height:var(--btn);padding:0;border:0;border-radius:14px;background:transparent url('./art/valley/tone-choices.webp') left center/300% 100% no-repeat}
+#tone-choices button:nth-child(2){background-position:center}
+#tone-choices button:nth-child(3){background-position:right}
+#tone-choices button[aria-pressed="true"]{outline:3px solid #6b4834;outline-offset:1px}
+#child-shelf{position:fixed;z-index:55;top:calc(var(--edge) + var(--btn) + 6px);right:var(--edge);width:min(440px,94vw);height:96px;box-sizing:border-box;padding:10px 18px;display:flex;align-items:center;justify-content:center;gap:4px;background:transparent url('./art/valley/songbook-shelf.webp') center/100% 100% no-repeat}
+#child-shelf button{flex:0 0 64px;width:64px;height:64px;padding:4px;border:0;background:transparent url('./art/pastels/card-face.png') center/100% 100% no-repeat}
+#child-shelf button img{width:100%;height:100%;object-fit:contain}
+.topbar a:focus-visible,.topbar button:focus-visible,.key:focus-visible,#child-free:focus-visible,#child-book:focus-visible{outline:3px solid #785c94}
+/* Hold-to-activate ring for Home and the gear (P09). */
+.topbar a,.topbar #stages{-webkit-touch-callout:none;touch-action:none}
 .topbar a::before,.topbar #stages::before{content:"";position:absolute;inset:-5px;border-radius:50%;pointer-events:none;opacity:0;background:conic-gradient(#ffc93c calc(var(--hold,0) * 360deg),#ffffffb0 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px));mask:radial-gradient(farthest-side,transparent calc(100% - 7px),#000 calc(100% - 6px))}
 .topbar a.holding::before,.topbar #stages.holding::before{opacity:1}
-.topbar #stages{opacity:.6}.topbar #stages.holding{opacity:1}
-.topbar #stages.has-news::after{content:"";position:absolute;right:4px;top:4px;width:14px;height:14px;border-radius:50%;background:#ffcf4a;border:2px solid #6b4a2b}
+.topbar #stages.holding{opacity:1}
+.topbar #stages.has-news::after{content:"";position:absolute;right:2px;top:2px;width:12px;height:12px;border-radius:50%;background:#ffcf4a;border:2px solid #6b4a2b}
+.topbar #mute.sound-fault::after{content:"!";position:absolute;right:-2px;top:-2px;width:22px;height:22px;border-radius:50%;background:#fff1bb;color:#633e27;border:2px solid #633e27;font:bold 17px/22px system-ui;text-align:center}
 
-/* P06: the glowing key keeps its own colour and its friend stays fully visible: a warm outline that breathes every 1.5 s.
-   The paw sits above the friend and points down at it. */
-#keys > .key.cue-active:not(.quiet-cue){filter:none!important;animation:none!important}
-#keys > .key.cue-active:not(.quiet-cue)::after{inset:-3px 2%;border:6px solid #ffb52e;border-radius:40px;box-shadow:0 0 8px 3px #ffd36b99;background:none;animation:cueBreath 1.5s ease-in-out infinite}
-@keyframes cueBreath{0%,100%{box-shadow:0 0 6px 2px #ffd36b88}50%{box-shadow:0 0 18px 8px #ffcf5ccc}}
-#keys > .key.cue-active.nudge{animation:gentlePoint .7s ease-in-out 1!important}
-.hand-cue{z-index:13}.hand-cue img{transform:rotate(200deg)}
-@media(prefers-reduced-motion:reduce){#keys > .key.cue-active:not(.quiet-cue)::after{animation:none}}
-
-/* P03: the celebration. */
-
-
-
-.key.hop img{animation:friendHop .55s cubic-bezier(.3,.7,.4,1) both!important}
-@keyframes friendHop{0%{transform:translateY(0)}38%{transform:translateY(-16%) rotate(-3deg)}70%{transform:translateY(0) scaleY(.95)}100%{transform:translateY(0)}}
-#party-sky{position:fixed;inset:0;z-index:44;pointer-events:none;overflow:hidden}
-.party-firefly{position:absolute;width:var(--size,22px);height:var(--size,22px);background:transparent url("./art/valley/firefly-glow.webp") center/350% 350% no-repeat;opacity:0;animation:fireflyDrift 7s ease-in-out infinite}
-@keyframes fireflyDrift{0%{opacity:0;transform:translate(0,0)}20%{opacity:.95}50%{transform:translate(var(--drift),-60px)}80%{opacity:.85}100%{opacity:0;transform:translate(0,-130px)}}
-.candle-firefly{width:30px;height:30px;margin-left:-15px;animation:fireflyFlight 1.2s ease-out forwards}
-body.party #candle-paw{display:none!important}
-body.party #stages,body.party #child-free,body.party #child-book,body.party #child-shelf{visibility:hidden;opacity:0;pointer-events:none}
-body.party-again #child-again{position:fixed;z-index:46;left:calc(50% + var(--cake-w) / 2 + 4px);top:calc(max(6px,1.5vh) + var(--cake-h) * .12);width:min(calc(var(--cake-h) * .8),170px);height:min(calc(var(--cake-h) * .8),170px);transform:none;animation:againBreath 2.4s ease-in-out infinite}
-@keyframes againBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-@media(prefers-reduced-motion:reduce){.key.hop img,body.party-again #child-again{animation:none!important}.party-firefly{animation:none;opacity:.9}.candle-firefly{display:none}}
-
-/* Call 1: the birthday person watches the whole song from beside the cake (pre-ending positions; the ending stage moves them). */
-#birthday-guest{background-size:100% 100%;transform-origin:50% 100%;transition:filter .3s ease-in-out,transform .3s ease-in-out}
-#birthday-guest-art{display:block;width:84%;height:88%;margin:6% auto 0;object-fit:contain}
+/* ---- The party band: the birthday person on the left, the cake in the centre, the jar beside it. ---- */
+#birthday-guest{position:fixed;z-index:24;left:calc(var(--edge) + var(--btn) + 10px);top:calc(var(--band) - var(--guest-h) - 6px);height:var(--guest-h);width:calc(var(--guest-h) * .8);pointer-events:none;transform-origin:50% 100%;transition:filter .3s ease-in-out,transform .3s ease-in-out}
+#birthday-guest-art{display:block;width:100%;height:100%;object-fit:contain;object-position:50% 100%;filter:drop-shadow(0 3px 2px #4a3b3440)}
 #birthday-guest .guest-cake{display:none}
-@media (orientation:landscape) and (max-height:599px){#birthday-guest{top:66px;right:calc(10% + 168px);left:auto;height:calc(42vh - 72px);width:calc((42vh - 72px) * .72)}}
-@media (orientation:landscape) and (min-height:600px){#birthday-guest{top:62px;left:calc(50% + 208px);right:auto;width:clamp(96px,10vw,130px);height:calc(36vh - 76px)}}
-#birthday-guest.guest-dear{filter:drop-shadow(0 0 9px #ffd875) drop-shadow(0 0 3px #ffbf3a);transform:scale(1.08)}
-@media(prefers-reduced-motion:reduce){#birthday-guest{transition:none}}
-/* The birthday person is the star of the ending: party hat sprite, bounces with the band, cheers for the candles. */
-body.cake-stage #birthday-guest{display:block!important;position:fixed;z-index:44;top:calc(max(6px,1.5vh) + var(--cake-h) * .06);left:calc(50% + var(--cake-w) / 2 + 2px);right:auto;width:calc(var(--cake-h) * .62);height:calc(var(--cake-h) * .9);background-size:100% 100%;animation:none;transform-origin:50% 100%}
-body.cake-stage #birthday-guest .guest-cake{display:none}
-body.cake-stage #birthday-guest-art{display:block;width:84%;height:88%;margin:6% auto 0;object-fit:contain}
-#birthday-guest.guest-hop{animation:guestHop .32s ease-out 1!important}
-#birthday-guest.guest-cheer{animation:guestCheer .7s cubic-bezier(.3,.7,.4,1) 1!important}
-@keyframes guestHop{0%,100%{transform:translateY(0)}45%{transform:translateY(-5%) rotate(2deg)}}
-@keyframes guestCheer{0%,100%{transform:translateY(0) scale(1)}35%{transform:translateY(-12%) scale(1.06) rotate(-4deg)}70%{transform:translateY(0) scale(.98)}}
-.sung-note{position:fixed;z-index:46;width:30px;height:35px;margin-left:-15px;pointer-events:none;animation:noteRise 1.6s ease-out forwards}
-@keyframes noteRise{0%{opacity:0;transform:translate(0,0) scale(.6)}15%{opacity:1}100%{opacity:0;transform:translate(var(--sway),-90px) scale(1.05)}}
+#birthday-guest.guest-dear{filter:drop-shadow(0 0 10px #ffd875) drop-shadow(0 0 3px #ffbf3a);transform:scale(1.08)}
+#birthday-guest.guest-hop{animation:guestHop .32s ease-out 1}
+#birthday-guest.guest-cheer{animation:guestCheer .7s cubic-bezier(.3,.7,.4,1) 1}
+.play-area{position:fixed;inset:0;z-index:20;pointer-events:none}
+.play-area>*{pointer-events:auto}
+#cake{position:fixed;z-index:30;top:calc(var(--band) - var(--cake-h) - 4px);left:calc(50% - var(--cake-w) / 2);width:var(--cake-w);height:var(--cake-h);pointer-events:none}
+#cake .cake-art{position:absolute;inset:auto 0 0 0;width:100%;height:76%;object-fit:contain;object-position:50% 100%;pointer-events:none}
+#candles{position:absolute;left:4%;right:4%;top:0;height:46%;display:flex;justify-content:center;pointer-events:auto}
+#candles button{position:relative;flex:1 1 0;height:100%;min-width:0;padding:0;margin:0;border:0;background:none;overflow:visible}
+#candles button img{width:100%;height:100%;object-fit:contain;pointer-events:none}
+#candles button img.reward-flame{position:absolute;left:50%;top:-26%;width:60%;height:52%;transform:translateX(-50%);transform-origin:50% 80%;animation:rewardFlameSway 1.3s ease-in-out infinite}
+#candles.help{outline:4px solid #e6bd75;border-radius:18px}
+#candle-paw{position:absolute;z-index:5;top:46%;width:clamp(40px,8vh,72px);height:clamp(40px,8vh,72px);margin-left:calc(clamp(40px,8vh,72px) / -2);object-fit:contain;pointer-events:none;animation:candleTap 20s ease-in-out infinite}
+.candle-smoke{position:absolute;z-index:5;top:-18%;width:12px;height:20px;border:2px solid #ede5d4;border-right-color:transparent;border-bottom-color:transparent;border-radius:50%;pointer-events:none;animation:smokeCurl .9s ease-out forwards}
+#cake.puff::after{content:"";position:absolute;left:38%;top:4%;width:24%;height:22%;border-radius:50%;background:radial-gradient(ellipse,#fffbe8b0,transparent 70%);animation:puffAway 1s ease-out both;pointer-events:none}
+/* The candle row is the only touch target on the cake; at the ending every candle is at least 64x64. */
+body.cake-stage #candles{left:50%;right:auto;width:max(92%,272px);transform:translateX(-50%)}
+body.cake-stage #candles button{min-width:64px;min-height:64px}
+#firefly-jar{position:fixed;z-index:24;top:calc(var(--band) - var(--cake-h) * .55 - 4px);left:calc(50% + var(--cake-w) / 2 + 6px);width:calc(var(--cake-h) * .55);height:calc(var(--cake-h) * .55);pointer-events:none}
+#firefly-jar>img{width:100%;height:100%;object-fit:contain}
+#jar-lights{position:absolute;inset:0}
+.jar-light,.flying-firefly,.party-firefly{position:absolute;width:22px;height:22px;background:transparent url('./art/valley/firefly-glow.webp') center/350% 350% no-repeat;pointer-events:none}
+.jar-light{transform:translate(-50%,-50%)}
+.flying-firefly{position:fixed;z-index:45;animation:fireflyFlight .5s ease-in-out forwards}
+#firefly-jar.jar-full{animation:jarSway 2s ease-in-out 1;filter:drop-shadow(0 0 8px #ffd875)}
 body.party #firefly-jar{visibility:hidden}
-body.party-again #child-again{left:calc(50% - var(--cake-w) / 2 - min(calc(var(--cake-h) * .8),170px) - 6px)}
-body.choosing #birthday-pictures{grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,.55fr)!important;align-items:end}
-body.choosing #birthday-pictures button[data-who="Valley friend"]{height:min(30vh,120px)!important;align-self:end}
-@media(prefers-reduced-motion:reduce){#birthday-guest.guest-hop,#birthday-guest.guest-cheer,.sung-note{animation:none!important}.sung-note{display:none}}
+/* Play Again: a big picture beside the cake once the party starts. */
+#child-again{position:fixed;z-index:46;top:calc(var(--band) - var(--cake-h) * .8 - 4px);left:calc(50% + var(--cake-w) / 2 + 8px);width:min(calc(var(--cake-h) * .8),170px);height:min(calc(var(--cake-h) * .8),170px);padding:0;border:0;background:transparent url('./art/valley/play-again.webp') center/contain no-repeat}
+body.party-again #child-again{animation:againBreath 2.4s ease-in-out infinite}
+body.choosing #child-again{display:none!important}
+/* During the candle moment only the candles, sound and keys can be touched. */
+body.cake-ready .topbar a,body.cake-ready #stages,body.cake-ready #child-free,body.cake-ready #child-book,body.cake-ready #child-shelf,
+body.party #stages,body.party #child-free,body.party #child-book,body.party #child-shelf{visibility:hidden;opacity:0;pointer-events:none}
+body.party #candle-paw{display:none!important}
+body.book-open #cake,body.book-open #firefly-jar,body.book-open #birthday-guest{visibility:hidden}
+/* Stage 3 colour path: stones in the band above the cake. */
+#path{display:none}
+#path.path-visible{position:fixed;z-index:31;top:var(--edge);left:50%;transform:translateX(-50%);display:flex;gap:5px;align-items:center;pointer-events:none}
+#path .path-stone{box-sizing:border-box;width:44px;height:44px;border:3px solid #4a3b34;border-radius:50%;background:transparent center/cover no-repeat;display:grid;place-items:center}
+#path .path-stone img{width:90%;height:90%;object-fit:contain}
 
-/* P05+: a finger or palm resting anywhere (sky, cake, edges) must never start a pinch or scroll that cancels key touches.
-   The game page never scrolls by touch; the grown-up panel keeps vertical panning. */
-html,body{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-#settings,#settings *{touch-action:pan-y;-webkit-user-select:text;user-select:text}
-
-/* Call 4: the friend on a key sings its note: it pops up with a little tilt and a note rises from it. */
-.key.pressed img{animation:friendSing .34s cubic-bezier(.3,.7,.4,1) both!important}
-@keyframes friendSing{0%{transform:translateY(0) scale(1)}35%{transform:translateY(-7%) scale(1.07) rotate(-3deg)}70%{transform:translateY(1%) scale(.98)}100%{transform:translateY(0) scale(1)}}
-.key-note{position:fixed;z-index:30;width:24px;height:28px;margin-left:-12px;pointer-events:none;animation:keyNoteRise 1s ease-out forwards}
-@keyframes keyNoteRise{0%{opacity:0;transform:translate(0,0) scale(.6)}15%{opacity:1}100%{opacity:0;transform:translate(var(--sway),-70px) scale(1)}}
-@media(prefers-reduced-motion:reduce){.key.pressed img{animation:none!important}.key-note{display:none}}
-
-#auto-move-row{display:flex;align-items:center;gap:10px;min-height:48px}#auto-move{width:28px;height:28px}
-
-/* Singing frames: cross-fade over 80 ms so the 1-2% outline difference never shows as a jump; reduced motion just swaps. */
+/* ---- The keys: the whole lower band, nearly full width. ---- */
+.keyboard-window{position:fixed;z-index:22;left:1%;right:1%;top:var(--band);bottom:6px;overflow:visible;background:transparent url('./art/valley/frame.webp') center/100% 100% no-repeat;transition:top .35s ease-in-out}
+.piano{position:relative;box-sizing:border-box;width:100%;height:100%;padding:1.5% 1%;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:0;touch-action:none}
+@media (orientation:landscape) and (min-height:501px){.piano{padding:clamp(24px,5vh,50px) 8%}}
+.key{position:relative;min-width:0;margin:0;padding:0;border:0;border-radius:0;box-shadow:none;background:transparent center/100% 100% no-repeat;touch-action:none;user-select:none;forced-color-adjust:none}
+.key[data-note="G4"]{background-image:url('./art/pastels/G4-face.png')}.key[data-note="A4"]{background-image:url('./art/pastels/A4-face.png')}
+.key[data-note="B4"]{background-image:url('./art/pastels/B4-face.png')}.key[data-note="C5"]{background-image:url('./art/pastels/C5-face.png')}
+.key[data-note="D5"]{background-image:url('./art/pastels/D5-face.png')}.key[data-note="E5"]{background-image:url('./art/pastels/E5-face.png')}
+.key[data-note="F5"]{background-image:url('./art/pastels/F5-face.png')}.key[data-note="G5"]{background-image:url('./art/pastels/G5-face.png')}
+.key img{position:absolute;left:4%;bottom:3%;width:92%;height:54%;object-fit:contain;pointer-events:none}
+.key[data-note="F5"] img{left:-34%;width:155%;height:52%;bottom:0;clip-path:inset(0 14% 0 22%)}
+.accidental{position:absolute;z-index:12;box-sizing:border-box;background:transparent url('./art/pastels/accidental-face.png') center/100% 100% no-repeat;pointer-events:none}
+/* Friends sing their note: idle and singing frames cross-fade; the friend pops up. */
 .key img.sing{opacity:0;transition:opacity 80ms ease-out}.key img.idle{opacity:1;transition:opacity 80ms ease-out}
 .key.pressed img.sing,.key.sing-now img.sing{opacity:1}.key.pressed img.idle,.key.sing-now img.idle{opacity:0}
-@media(prefers-reduced-motion:reduce){.key img.sing,.key img.idle{transition:none}}
+.key.pressed img{animation:friendSing .34s cubic-bezier(.3,.7,.4,1) both}
+.key.hop img{animation:friendHop .55s cubic-bezier(.3,.7,.4,1) both}
+.key.replay-note{outline:5px solid #ffe49a;outline-offset:-5px}
+/* Hints: the glowing key keeps its colour; other keys dim slightly; quiet cues in later stages. */
+.key.cue-active{z-index:6;overflow:visible}
+#keys:has(.key.cue-active:not(.quiet-cue))>.key:not(.cue-active){filter:grayscale(10%) brightness(.94);transition:filter 300ms ease-in-out}
+#keys>.key.cue-active:not(.quiet-cue)::after{content:"";position:absolute;inset:-3px 2%;border:6px solid #ffb52e;border-radius:40px;pointer-events:none;animation:cueBreath 1.5s ease-in-out infinite}
+.key.cue-active.quiet-cue::after{content:"";position:absolute;inset:-3px 2%;border:6px solid #ffb52e;border-radius:40px;pointer-events:none;opacity:0}
+.key.cue-active.quiet-cue.hint::after{opacity:1}
+#keys>.key.cue-active.nudge{animation:gentlePoint .7s ease-in-out 1}
+.hand-cue{position:absolute;z-index:13;width:70px;height:70px;pointer-events:none;opacity:0;filter:drop-shadow(0 3px 3px #80572c)}
+.hand-cue img{width:100%;height:100%;object-fit:contain;transform:rotate(200deg)}
+.hand-cue.demonstrate{opacity:1;animation:pawTap 1.5s ease-in-out infinite}
+.key-note{position:fixed;z-index:30;width:24px;height:28px;margin-left:-12px;pointer-events:none;animation:keyNoteRise 1s ease-out forwards}
+.sung-note{position:fixed;z-index:46;width:30px;height:35px;margin-left:-15px;pointer-events:none;animation:noteRise 1.6s ease-out forwards}
+#party-sky{position:fixed;inset:0;z-index:44;pointer-events:none;overflow:hidden}
+.party-firefly{opacity:0;width:var(--size,22px);height:var(--size,22px);animation:fireflyDrift 7s ease-in-out infinite}
+.candle-firefly{width:30px;height:30px;margin-left:-15px;animation:fireflyFlight 1.2s ease-out forwards}
 
-/* Update-proofing: until the game script says it is ready, nothing half-built shows. */
+/* ---- Picker: choose whose birthday. ---- */
+#picker-invite,#birthday-pictures{display:none}
+body.choosing #birthday-pictures{position:fixed;z-index:50;inset:0;box-sizing:border-box;padding:calc(var(--edge) + var(--btn) + 4vh) 3vw 4vh;display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,.55fr);align-items:end;gap:8px}
+body.choosing #picker-invite{display:block;position:fixed;z-index:51;top:var(--edge);left:50%;transform:translateX(-50%);width:clamp(110px,22vh,180px);height:clamp(74px,15vh,120px);padding:0;border:0;background:none}
+#picker-invite img{width:100%;height:100%;object-fit:contain}
+#birthday-pictures button{position:relative;box-sizing:border-box;height:min(56vh,300px);min-width:0;padding:6%;border:0;background:transparent url('./art/pastels/card-face.png') center/100% 100% no-repeat;transition:filter .3s ease-in-out}
+#birthday-pictures button[data-who="Valley friend"]{height:min(30vh,140px)}
+#birthday-pictures button img{width:100%;height:100%;object-fit:contain;pointer-events:none}
+#birthday-pictures button.picker-hint{filter:drop-shadow(0 0 8px #eab44b) drop-shadow(0 0 4px #ffd970)}
+#birthday-pictures button.chosen{animation:cardHop .35s ease-out}
+body.choosing #birthday-guest,body.choosing #firefly-jar,body.choosing #child-free,body.choosing #child-book,body.choosing #child-shelf,body.choosing #tone-choices,body.choosing #path{display:none!important}
+body.choosing .play-area{visibility:hidden}body.choosing.selecting .play-area{visibility:visible}
+
+/* ---- Boot guard (update-proofing). ---- */
 #boot{position:fixed;inset:0;z-index:200;display:grid;place-items:center;pointer-events:none;opacity:0;animation:bootShow .4s ease-out 1.2s forwards}
 #boot img{width:min(30vh,180px);height:auto;animation:bootFloat 2.4s ease-in-out infinite}
-@keyframes bootShow{to{opacity:1}}@keyframes bootFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 html.boot-ok #boot{display:none}
 html.boot-failed #boot{animation:none;opacity:1}html.boot-failed main{visibility:hidden}
-@media(prefers-reduced-motion:reduce){#boot img{animation:none}}
+
+/* ---- Grown-up panel (rebuilt in item 8; kept working here). ---- */
+.controls details:not([open]){display:none}
+.controls details[open]{position:fixed;z-index:70;inset:6%;overflow:auto;margin:0;padding:20px;border-radius:24px;background:#fff9ee;color:#4a3b34;box-shadow:0 8px 32px #58433d66;text-align:center;touch-action:pan-y;-webkit-user-select:text;user-select:text}
+.controls details[open] *{touch-action:pan-y}
+.controls details[open] button,.controls summary{box-sizing:border-box;min-height:56px;min-width:56px;margin:.3rem;padding:.6rem 1rem;border:0;border-radius:18px;background:#fff1dc;color:#55465d;box-shadow:0 3px 0 #d7c0bd;font:600 1rem system-ui;display:inline-flex;align-items:center;justify-content:center;gap:.35rem}
+.controls details[open] button svg{width:28px;height:28px;flex:none}
+.controls #again{display:inline-flex}
+#stage-pictures{display:flex;justify-content:center;flex-wrap:wrap;gap:.4rem}
+#stage-pictures button{width:120px;height:130px;background:transparent!important;box-shadow:none!important;padding:2px;flex-direction:column}
+#stage-pictures button img{width:100%;height:76%;object-fit:contain}
+#stage-pictures button span{font-size:.8rem}
+#stage-pictures button[aria-pressed="true"]{box-shadow:0 0 0 4px #a187af!important}
+#gate{box-sizing:border-box;min-width:90px;min-height:56px;border:3px solid #4a3b34;border-radius:18px;background:#fffdf8;color:#4a3b34;text-align:center;font-size:1.2rem}
+#auto-move-row{display:flex;align-items:center;justify-content:center;gap:10px;min-height:48px}#auto-move{width:28px;height:28px}
+@media (prefers-color-scheme:dark){.controls details[open]{background:#34303e;color:#fff}.controls details[open] button,.controls summary{background:#4a4458;color:#fff;box-shadow:0 3px 0 #22202a}}
+
+/* ---- Portrait keeps one left-to-right row of keys under a shorter party band. ---- */
+@media (orientation:portrait){
+ .keyboard-window{top:calc(var(--band) + 2vh);bottom:auto;height:min(46vh,92vw)}
+ #birthday-guest{left:var(--edge);width:calc(var(--guest-h) * .7)}
+ body.choosing #birthday-pictures{grid-template-columns:repeat(2,minmax(0,1fr));align-content:center;padding-top:calc(var(--btn) + 18vh)}
+ #birthday-pictures button{height:24vh}#birthday-pictures button[data-who="Valley friend"]{height:16vh}
+}
+
+/* ---- Motion ---- */
+@keyframes rewardFlameSway{0%,100%{transform:translateX(-50%) rotate(-3deg)}50%{transform:translateX(-50%) rotate(3deg)}}
+@keyframes candleTap{0%,10%,100%{transform:translateY(0)}5%{transform:translateY(-5px)}}
+@keyframes smokeCurl{from{opacity:.65;transform:translateY(0) rotate(0)}to{opacity:0;transform:translateY(-18px) rotate(35deg)}}
+@keyframes puffAway{from{opacity:.7;transform:translateY(0) scale(.6)}to{opacity:0;transform:translateY(-25px) scale(1.5)}}
+@keyframes fireflyFlight{0%{transform:translate(0,0) scale(.8);opacity:.9}50%{transform:translate(calc(var(--dx)*.5),calc(var(--dy)*.5 - 28px)) scale(1.1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(.8);opacity:0}}
+@keyframes jarSway{0%,100%{transform:rotate(0)}33%{transform:rotate(-5deg)}66%{transform:rotate(5deg)}}
+@keyframes againBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+@keyframes guestHop{0%,100%{transform:translateY(0)}45%{transform:translateY(-5%) rotate(2deg)}}
+@keyframes guestCheer{0%,100%{transform:translateY(0) scale(1)}35%{transform:translateY(-12%) scale(1.06) rotate(-4deg)}70%{transform:translateY(0) scale(.98)}}
+@keyframes friendSing{0%{transform:translateY(0) scale(1)}35%{transform:translateY(-7%) scale(1.07) rotate(-3deg)}70%{transform:translateY(1%) scale(.98)}100%{transform:translateY(0) scale(1)}}
+@keyframes friendHop{0%{transform:translateY(0)}38%{transform:translateY(-16%) rotate(-3deg)}70%{transform:translateY(0) scaleY(.95)}100%{transform:translateY(0)}}
+@keyframes cueBreath{0%,100%{box-shadow:0 0 6px 2px #ffd36b88}50%{box-shadow:0 0 18px 8px #ffcf5ccc}}
+@keyframes gentlePoint{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes pawTap{0%,100%{transform:translateY(-8px)}50%{transform:translateY(7px)}}
+@keyframes keyNoteRise{0%{opacity:0;transform:translate(0,0) scale(.6)}15%{opacity:1}100%{opacity:0;transform:translate(var(--sway),-70px) scale(1)}}
+@keyframes noteRise{0%{opacity:0;transform:translate(0,0) scale(.6)}15%{opacity:1}100%{opacity:0;transform:translate(var(--sway),-90px) scale(1.05)}}
+@keyframes fireflyDrift{0%{opacity:0;transform:translate(0,0)}20%{opacity:.95}50%{transform:translate(var(--drift),-60px)}80%{opacity:.85}100%{opacity:0;transform:translate(0,-130px)}}
+@keyframes cardHop{50%{transform:translateY(-15px)}100%{transform:translateY(0)}}
+@keyframes bootShow{to{opacity:1}}
+@keyframes bootFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@media (prefers-reduced-motion:reduce){
+ *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}
+ .party-firefly{opacity:.9}.candle-firefly,.key-note,.sung-note,.flying-firefly,.candle-smoke{display:none}
+}
 </style><script>
 // Update-proofing: if the game module cannot load (for example a phone still holding an old cached song.mjs after an update),
 // hide the half-built page, show the butterfly, and reload once with a fresh URL. Never loops.
@@ -336,7 +209,7 @@ html.boot-failed #boot{animation:none;opacity:1}html.boot-failed main{visibility
 window.addEventListener('error',function(e){if(!window.__pianoReady&&(e.error instanceof SyntaxError||/module|export|import/i.test(String(e.message))))fail()});
 setTimeout(fail,10000)})();
 </script></head><body class="choosing"><div id="boot" aria-hidden="true"><img src="./art/valley/characters_pip_idle.webp" alt=""></div><div class="valley-backdrop" aria-hidden="true"><img src="./art/valley/bg_shared_layer0.webp" alt=""><img src="./art/valley/bg_map_layer1.webp" alt=""><img src="./art/valley/bg_map_layer2.webp" alt=""></div><main><nav class="topbar" aria-label="Piano navigation"><a aria-label="Home to the Valley" href="https://raynas-valley.bp9118.chatgpt.site"><svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 27 32 8 56 27M15 24v31h34V24M26 55V38h12v17"/></svg><span>Home</span></a><h1>Birthday Piano</h1><button id="help" aria-label="Show me what to do"><img src="./art/v8/help.webp" alt=""><span>Help</span></button><button id="stages" aria-label="Open grown-up stage settings" aria-controls="settings" aria-expanded="false"><svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"><path d="M27 6h10l2 7 6 3 7-3 7 8-4 6v10l4 6-7 8-7-3-6 3-2 7H27l-2-7-6-3-7 3-7-8 4-6V27l-4-6 7-8 7 3 6-3z" fill="#d9c7ff"/><circle cx="32" cy="32" r="10" fill="#fffdf8"/></svg><span>Stages</span></button><button id="mute" aria-label="Mute sound" aria-pressed="false"><svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 25h12l13-12v38L22 39H10Z"/><path d="M43 22q12 10 0 20M51 14q21 18 0 36"/></svg><span>Sound</span></button></nav><label for="who" hidden>Birthday recipient</label><select id="who" hidden><option value="Rayna">● Rayna</option><option value="Mommy">♥ Mommy</option><option value="Daddy">◆ Daddy</option><option value="Grandpa">▲ Grandpa</option><option value="Valley friend">★ Valley friend</option></select><button id="picker-invite" type="button" aria-label="Choose a birthday person"><img src="./art/valley/cake.webp" alt=""></button><div id="birthday-pictures" aria-label="Choose whose birthday"></div><div id="birthday-guest" aria-label="Birthday person"><img id="birthday-guest-art" alt=""><img class="guest-cake" src="./art/valley/cake.webp" alt=""></div><div id="firefly-jar" class="firefly-jar" aria-hidden="true"><img src="./art/valley/firefly-jar-face.webp" alt=""><div id="jar-lights"></div></div><section class="play-area" aria-label="Piano and birthday cake"><div id="cake" aria-label="Birthday cake"><div id="candles" aria-label="Birthday candles"></div><img id="candle-paw" src="./art/valley/ui_hand.webp" alt="" aria-hidden="true" hidden><img class="cake-art" src="./art/valley/cake.webp" alt=""></div><div class="keyboard-window" id="keyboard-window"><div class="piano" id="keys" aria-label="Piano keys"></div><div class="hand-cue demonstrate" id="hand-cue" aria-hidden="true"><img src="./art/valley/ui_hand.webp" alt=""></div></div><p id="key-cue" aria-live="polite"></p><div class="scroll-controls"><button id="left" aria-label="Show lower keys">◀</button> <button id="right" aria-label="Show higher keys">▶</button></div></section><button id="child-again" type="button" aria-label="Play the birthday song again" hidden></button><button id="child-free" type="button" aria-label="Free play">♫</button><button id="child-voice" type="button" aria-label="Change free play sound" data-tone="sine" hidden>♪</button><div id="tone-choices" aria-label="Choose a free play sound" hidden><button id="tone-musicbox" type="button" aria-label="Music box sound"></button><button id="tone-piano" type="button" aria-label="Piano sound"></button><button id="tone-bells" type="button" aria-label="Bell sound"></button></div><button id="child-book" type="button" aria-label="Open my songbook" aria-controls="child-shelf" aria-expanded="false" hidden>♪</button><div id="child-shelf" aria-label="My song stickers" hidden></div><div id="path" aria-label="Next notes"></div><p class="status" id="status" aria-live="polite">Magic play</p><p id="lyrics" aria-label="Song words"></p><div class="friend" id="friend"><img src="./art/valley/characters_pip_idle.webp" alt="Pip, the Valley butterfly"></div><div class="controls"><details id="settings"><summary>Grown-up settings</summary><button id="fullscreen-retry" type="button">Enter fullscreen</button><p id="fullscreen-status" role="status">Fullscreen is requested when you choose a birthday.</p><p id="sound-warning" role="status" hidden>Sound could not start. Tap a piano key to try again, and check the device volume.</p><div id="parent-guide" aria-label="How to play"><p>1. Pick whose birthday, then let Rayna tap the piano.</p><p>2. Follow the glowing key to collect fireflies; tap the candles at the end.</p><p>3. Use the gear and grown-up check to choose a stage or sound. Fullscreen is available here when supported.</p></div><p>Grown-up check: what is 7 + 5?</p><label for="gate">Answer</label> <input id="gate" inputmode="numeric" size="3"><button id="unlock">Unlock settings</button><label for="sound"> Sound</label> <select id="sound" disabled><option value="sine">Music box</option><option value="triangle">Soft piano</option><option value="bell">Bells</option></select><p id="parent-note">Progress will appear here.</p><button id="choose-birthday" type="button" disabled>Choose another birthday</button><div id="stage-pictures" aria-label="Choose a piano stage"></div><label id="auto-move-row"><input type="checkbox" id="auto-move" disabled checked> Move up by herself (Magic play and Glow follow)</label> <label for="stage"> Piano stage</label> <select id="stage" disabled><option value="1">Magic play</option><option value="2">Glow follow</option><option value="3">Color path</option><option value="4">Little hints</option><option value="5">By heart</option></select><button id="next" hidden><svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M12 32h40M38 18l14 14-14 14"/></svg><span>Try next</span></button><button id="free"><svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"><rect x="7" y="17" width="50" height="34" rx="7"/><path d="M20 18v32M32 18v32M44 18v32"/></svg><span>Free play</span></button><button id="together" aria-pressed="false" disabled><svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"><path d="M20 44V16l25-6v29"/><circle cx="14" cy="44" r="6" fill="currentColor"/><circle cx="39" cy="39" r="6" fill="currentColor"/></svg><span>Together: off</span></button><button id="again" aria-label="Play again"><svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 26a19 19 0 1 1 0 17M15 13v13h13"/></svg><span>Play again</span></button><div id="stickers" aria-label="Completed stages"></div><button id="songbook"><svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"><path d="M32 18Q20 10 8 15v37q12-4 24 4 12-8 24-4V15q-12-5-24 3Zm0 0v38"/></svg><span>Songbook: replay my song</span></button><p>Birthday Piano is a separate playtest. Your Valley saves stay in the Valley.</p></details></div></main><script type="module">
-import {KEYS,PHRASES,newSong,press,newPractice,practicePress,restoreProgress,markStageCompleted,validPerformance,validFinalDraft,compatibleSave,visualDelay,keyDirection,magicIncentive,validIncentive,autoStageAfterSong,validSongHits} from './song.mjs?v=fa55b22';
+import {KEYS,PHRASES,newSong,press,newPractice,practicePress,restoreProgress,markStageCompleted,validPerformance,validFinalDraft,compatibleSave,visualDelay,keyDirection,magicIncentive,validIncentive,autoStageAfterSong,validSongHits} from './song.mjs?v=6f8d05f';
 // Call 3: she moves between Magic play and Glow follow by herself (logic in song.mjs). A stage a grown-up picks is pinned.
 let autoMove=true,songHits=[],nextStage=null,songTapCount=0,songHitCount=0;const helpLines=new Set();
 const lines=[['Hap','py','birth','day','to','you'],['Hap','py','birth','day','to','you'],['Hap','py','birth','day','dear','Ray','na'],['Hap','py','birth','day','to','you']];const lyric=document.querySelector('#lyrics');function words(phrase,note){const line=[...lines[phrase]];if(phrase===2){line[5]=document.querySelector('#who').value;line[6]='♪'}lyric.replaceChildren(...line.map((word,i)=>{let s=document.createElement('span');s.textContent=word+' ';if(i===note)s.style.fontWeight='bold';return s}))}words(0,0);
