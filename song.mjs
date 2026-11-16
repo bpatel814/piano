@@ -70,7 +70,8 @@ export function validFinalDraft(state,notes) {
 }
 export function compatibleSave(saved) {
   if(!saved||typeof saved!=='object'||Array.isArray(saved)||saved.v!==1||!Number.isInteger(saved.stage)||saved.stage<1||saved.stage>5)return false;
-  if(Object.keys(saved).some(k=>!['v','stage','who','state','completedStages','performances','candles','cakeReady','incentive','finalDraft','sound','together','fullscreenPreference','autoMove','songHits','nextStage'].includes(k)))return false;
+  if(Object.keys(saved).some(k=>!['v','stage','who','state','completedStages','performances','candles','cakeReady','incentive','finalDraft','sound','together','fullscreenPreference','autoMove','songHits','nextStage','playedToday'].includes(k)))return false;
+  if(saved.playedToday!=null&&!validPlayedToday(saved.playedToday))return false;
   if(saved.autoMove!=null&&typeof saved.autoMove!=='boolean')return false;
   if(saved.songHits!=null&&!validSongHits(saved.songHits))return false;
   if(saved.nextStage!=null&&!(saved.nextStage===1||saved.nextStage===2))return false;
@@ -124,3 +125,7 @@ export function autoStageAfterSong(stage, history, song) {
   if (stage === 2 && Number.isInteger(song?.helpLines)) return song.helpLines >= STUCK_LINES ? {stage:1, songHits:[]} : {stage:2, songHits:recent};
   return {stage, songHits:recent};
 }
+
+// Who she has played the song for today (picker shows them wearing their party hat). Names only, no times.
+export const FAMILY = Object.freeze(['Rayna','Mommy','Daddy','Grandpa','Valley friend']);
+export function validPlayedToday(x){return !!x&&typeof x==='object'&&!Array.isArray(x)&&Object.keys(x).every(k=>k==='date'||k==='who')&&/^\d{4}-\d{2}-\d{2}$/.test(x.date)&&Array.isArray(x.who)&&x.who.length<=FAMILY.length&&x.who.every(n=>FAMILY.includes(n))&&new Set(x.who).size===x.who.length}
