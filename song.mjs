@@ -70,7 +70,10 @@ export function validFinalDraft(state,notes) {
 }
 export function compatibleSave(saved) {
   if(!saved||typeof saved!=='object'||Array.isArray(saved)||saved.v!==1||!Number.isInteger(saved.stage)||saved.stage<1||saved.stage>5)return false;
-  if(Object.keys(saved).some(k=>!['v','stage','who','state','completedStages','performances','candles','cakeReady','incentive','finalDraft','sound','together','fullscreenPreference'].includes(k)))return false;
+  if(Object.keys(saved).some(k=>!['v','stage','who','state','completedStages','performances','candles','cakeReady','incentive','finalDraft','sound','together','fullscreenPreference','autoMove','songHits','nextStage'].includes(k)))return false;
+  if(saved.autoMove!=null&&typeof saved.autoMove!=='boolean')return false;
+  if(saved.songHits!=null&&!validSongHits(saved.songHits))return false;
+  if(saved.nextStage!=null&&!(saved.nextStage===1||saved.nextStage===2))return false;
   if(saved.sound!=null&&!['sine','triangle','bell'].includes(saved.sound))return false;
   if(saved.together!=null&&typeof saved.together!=='boolean')return false;
   if(saved.fullscreenPreference!=null&&typeof saved.fullscreenPreference!=='boolean')return false;
@@ -106,3 +109,18 @@ export function magicIncentive(previous, expected, played, endOfPhrase = false) 
 }
 
 export function validIncentive(p){return !!p && typeof p==="object" && Object.keys(p).every(k=>["hits","taps","fireflies","lineHits","lineTaps","invite","qualified"].includes(k)) && [p.hits,p.taps,p.fireflies,p.lineHits,p.lineTaps].every(x=>Number.isSafeInteger(x)&&x>=0&&x<=1000000) && p.hits<=p.taps && p.fireflies<=40 && (p.qualified==null||(Number.isSafeInteger(p.qualified)&&p.qualified>=0&&p.qualified<=1000000)) && p.lineHits<=p.lineTaps && typeof p.invite==="boolean"}
+
+// Learning without being taught (Fable call 3, Nov 16). Only stages 1 and 2 move by themselves; stages 3-5 are a grown-up's choice.
+// Up: two full Magic-play songs in a row with at least 80% glowing-key hits. Down: a Glow-follow song where extra help was
+// needed on 3 or more of its 4 lines. Never announced. history = the last stage-1 song hit percents (at most 2).
+export const AUTO_UP_PERCENT = 80, AUTO_UP_SONGS = 2, STUCK_LINES = 3;
+export function validSongHits(x){return Array.isArray(x)&&x.length<=AUTO_UP_SONGS&&x.every(p=>Number.isInteger(p)&&p>=0&&p<=100)}
+export function autoStageAfterSong(stage, history, song) {
+  const recent = validSongHits(history) ? history : [];
+  if (stage === 1 && Number.isInteger(song?.hitPercent) && song.hitPercent >= 0 && song.hitPercent <= 100) {
+    const next = [...recent, song.hitPercent].slice(-AUTO_UP_SONGS);
+    return next.length === AUTO_UP_SONGS && next.every(p => p >= AUTO_UP_PERCENT) ? {stage:2, songHits:[]} : {stage:1, songHits:next};
+  }
+  if (stage === 2 && Number.isInteger(song?.helpLines)) return song.helpLines >= STUCK_LINES ? {stage:1, songHits:[]} : {stage:2, songHits:recent};
+  return {stage, songHits:recent};
+}
