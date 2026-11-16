@@ -1,10 +1,28 @@
 // Standalone synthetic prototype. No family data or game integration.
-export const PHRASES = Object.freeze([
+// Songs are data (redesign item 10). Every note fits the eight keys G4-G5. beats = note lengths for the band's playback.
+const BIRTHDAY = Object.freeze([
   ['G4','G4','A4','G4','C5','B4'],
   ['G4','G4','A4','G4','D5','C5'],
   ['G4','G4','G5','E5','C5','B4','A4'],
   ['F5','F5','E5','C5','D5','C5']
-]);
+].map(l => Object.freeze(l)));
+const TWINKLE = Object.freeze([
+  ['G4','G4','D5','D5','E5','E5','D5'],
+  ['C5','C5','B4','B4','A4','A4','G4'],
+  ['D5','D5','C5','C5','B4','B4','A4'],
+  ['D5','D5','C5','C5','B4','B4','A4'],
+  ['G4','G4','D5','D5','E5','E5','D5'],
+  ['C5','C5','B4','B4','A4','A4','G4']
+].map(l => Object.freeze(l)));
+export const SONGS = Object.freeze({
+  birthday: Object.freeze({phrases: BIRTHDAY, beats: [[.75,.25,1,1,1,2],[.75,.25,1,1,1,2],[.75,.25,1,1,1,1,2],[.75,.25,1,1,1,3]]}),
+  twinkle: Object.freeze({phrases: TWINKLE, beats: TWINKLE.map(() => [1,1,1,1,1,1,2])})
+});
+// The song being played. PHRASES is a live binding: importers always see the current song's lines.
+export let SONG_ID = 'birthday';
+export let PHRASES = BIRTHDAY;
+export function useSong(id) { if (!SONGS[id]) id = 'birthday'; SONG_ID = id; PHRASES = SONGS[id].phrases; return id; }
+const phrasesOf = id => (SONGS[id] || SONGS.birthday).phrases;
 export const KEYS = Object.freeze(['G4','A4','B4','C5','D5','E5','F5','G5']);
 export function newSong(stage = 1) {
   if (!Number.isInteger(stage) || stage < 1 || stage > 5) throw new RangeError('stage');
@@ -37,12 +55,14 @@ export function practicePress(state, key) {
 
 // Validate only the module's own progress. Unknown versions and malformed data are ignored.
 export function restoreProgress(value) {
+  if (value && value.song != null && !SONGS[value.song]) return null;
+  const P = phrasesOf(value && value.song);
   if (!value || value.v !== 1 || !value.state || typeof value.state !== 'object') return null;
   const s=value.state;
-  if (!Number.isInteger(s.stage)||s.stage<1||s.stage>5||!Number.isInteger(s.phrase)||s.phrase<0||s.phrase>=PHRASES.length||!Number.isInteger(s.note)||s.note<0||s.note>=PHRASES[s.phrase].length)return null;
+  if (!Number.isInteger(s.stage)||s.stage<1||s.stage>5||!Number.isInteger(s.phrase)||s.phrase<0||s.phrase>=P.length||!Number.isInteger(s.note)||s.note<0||s.note>=P[s.phrase].length)return null;
   if(s.stage===1){if(Object.keys(s).some(k=>!['stage','phrase','note','complete'].includes(k)))return null;if(typeof s.complete!=='boolean')return null;return {stage:1,phrase:s.phrase,note:s.note,complete:s.complete};}
   if(Object.keys(s).some(k=>!['stage','unlocked','phrase','note','repetitions','mistakes','extraHelp','cycleComplete','clean','joining','complete'].includes(k)))return null;
-  if(!Number.isInteger(s.unlocked)||s.unlocked<1||s.unlocked>4||s.phrase>=s.unlocked||!Number.isInteger(s.repetitions)||s.repetitions<0||s.repetitions>100000||!Number.isInteger(s.mistakes)||s.mistakes<0||s.mistakes>100000||typeof s.extraHelp!=='boolean'||typeof s.cycleComplete!=='boolean'||typeof s.clean!=='boolean'||(s.joining!=null&&typeof s.joining!=='boolean')||(s.complete!=null&&typeof s.complete!=='boolean')||(s.joining&&s.unlocked<2))return null;
+  if(!Number.isInteger(s.unlocked)||s.unlocked<1||s.unlocked>P.length||s.phrase>=s.unlocked||!Number.isInteger(s.repetitions)||s.repetitions<0||s.repetitions>100000||!Number.isInteger(s.mistakes)||s.mistakes<0||s.mistakes>100000||typeof s.extraHelp!=='boolean'||typeof s.cycleComplete!=='boolean'||typeof s.clean!=='boolean'||(s.joining!=null&&typeof s.joining!=='boolean')||(s.complete!=null&&typeof s.complete!=='boolean')||(s.joining&&s.unlocked<2))return null;
   return {stage:s.stage,unlocked:s.unlocked,phrase:s.phrase,note:s.note,repetitions:s.repetitions,mistakes:s.mistakes,extraHelp:s.extraHelp,cycleComplete:s.cycleComplete,clean:s.clean,joining:s.joining===true,complete:s.complete===true};
 }
 
@@ -61,16 +81,17 @@ export function validPerformance(notes) {
   return output;
 }
 // Only a genuine straight-through note prefix is retained on-device.
-export function validFinalDraft(state,notes) {
+export function validFinalDraft(state,notes,P=PHRASES) {
   if(!state || state.stage<2 || state.stage>5 || state.complete)return null;
-  const prefixLength=PHRASES.slice(0,state.phrase).reduce((n,p)=>n+p.length,0)+state.note;
-  const valid=validPerformance(notes), expected=PHRASES.flat();
+  const prefixLength=P.slice(0,state.phrase).reduce((n,p)=>n+p.length,0)+state.note;
+  const valid=validPerformance(notes), expected=P.flat();
   if(!valid || valid.length!==prefixLength || valid.length>=expected.length || !valid.every((n,i)=>n.key===expected[i]))return null;
   return valid;
 }
 export function compatibleSave(saved) {
   if(!saved||typeof saved!=='object'||Array.isArray(saved)||saved.v!==1||!Number.isInteger(saved.stage)||saved.stage<1||saved.stage>5)return false;
-  if(Object.keys(saved).some(k=>!['v','stage','who','state','completedStages','performances','candles','cakeReady','incentive','finalDraft','sound','together','fullscreenPreference','autoMove','songHits','nextStage','playedToday','volume','panelTheme'].includes(k)))return false;
+  if(Object.keys(saved).some(k=>!['v','stage','who','state','completedStages','performances','candles','cakeReady','incentive','finalDraft','sound','together','fullscreenPreference','autoMove','songHits','nextStage','playedToday','volume','panelTheme','song'].includes(k)))return false;
+  if(saved.song!=null&&!SONGS[saved.song])return false;
   if(saved.volume!=null&&!(typeof saved.volume==='number'&&saved.volume>=0.2&&saved.volume<=1))return false;
   if(saved.panelTheme!=null&&!['auto','light','dark'].includes(saved.panelTheme))return false;
   if(saved.playedToday!=null&&!validPlayedToday(saved.playedToday))return false;
@@ -87,7 +108,7 @@ export function compatibleSave(saved) {
   if(saved.candles!=null&&(!Array.isArray(saved.candles)||saved.candles.length!==4||saved.candles.some(x=>typeof x!=='boolean')))return false;
   if(saved.cakeReady!=null&&typeof saved.cakeReady!=='boolean')return false;
   if(saved.incentive!=null&&!validIncentive(saved.incentive))return false;
-  if(saved.finalDraft!=null&&!validFinalDraft(saved.state,saved.finalDraft))return false;
+  if(saved.finalDraft!=null&&!validFinalDraft(saved.state,saved.finalDraft,phrasesOf(saved.song)))return false;
   return true;
 }
 // Model-side timing guard only; this is not a rendered flash-safety certification.
