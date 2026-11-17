@@ -1,7 +1,7 @@
 // Birthday Piano offline support (redesign item 9). The page and the game module come from the network first, so
 // an update reaches the family on the next open; the cached copy is used only when offline. Pictures are cache-first.
 // VERSION is stamped with the commit by the publish workflow, which also clears old caches.
-const VERSION = '85dcd0c';
+const VERSION = '3c8059f';
 const CACHE = 'birthday-piano-' + VERSION;
 const SHELL = ['./index.html', './song.mjs', './manifest.webmanifest', './art/valley/icon-192.png'];
 self.addEventListener('install', e => {
