@@ -90,7 +90,8 @@ export function validFinalDraft(state,notes,P=PHRASES) {
 }
 export function compatibleSave(saved) {
   if(!saved||typeof saved!=='object'||Array.isArray(saved)||saved.v!==1||!Number.isInteger(saved.stage)||saved.stage<1||saved.stage>5)return false;
-  if(Object.keys(saved).some(k=>!['v','stage','who','state','completedStages','performances','candles','cakeReady','incentive','finalDraft','sound','together','fullscreenPreference','autoMove','songHits','nextStage','playedToday','volume','panelTheme','song','byHeart','copyAt'].includes(k)))return false;
+  if(Object.keys(saved).some(k=>!['v','stage','who','state','completedStages','performances','candles','cakeReady','incentive','finalDraft','sound','together','fullscreenPreference','autoMove','songHits','nextStage','playedToday','volume','panelTheme','song','byHeart','copyAt','away'].includes(k)))return false;
+  if(saved.away!=null&&!validAway(saved.away))return false;
   if(saved.copyAt!=null&&!validCopyAt(saved.copyAt))return false;
   if(saved.byHeart!=null&&!(typeof saved.byHeart==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(saved.byHeart)))return false;
   if(saved.song!=null&&!SONGS[saved.song])return false;
@@ -190,3 +191,6 @@ export function copyPiece(songId, phrase, note, level = 0) {
   return {start: Math.min(note, len - 1), end: len};
 }
 export function validCopyAt(x){return !!x&&typeof x==='object'&&!Array.isArray(x)&&Object.keys(x).every(k=>['phrase','note','level'].includes(k))&&[x.phrase,x.note,x.level].every(Number.isInteger)&&x.phrase>=0&&x.phrase<6&&x.note>=0&&x.note<8&&x.level>=0&&x.level<=2}
+
+// Who is NOT coming to the family scene after the song (grown-up ticks). Missing or empty = everyone comes.
+export function validAway(x){return Array.isArray(x)&&x.length<=FAMILY.length&&x.every(n=>FAMILY.includes(n))&&new Set(x).size===x.length}
