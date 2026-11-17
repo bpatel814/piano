@@ -15,8 +15,8 @@ const TWINKLE = Object.freeze([
   ['C5','C5','B4','B4','A4','A4','G4']
 ].map(l => Object.freeze(l)));
 export const SONGS = Object.freeze({
-  birthday: Object.freeze({phrases: BIRTHDAY, beats: [[.75,.25,1,1,1,2],[.75,.25,1,1,1,2],[.75,.25,1,1,1,1,2],[.75,.25,1,1,1,3]]}),
-  twinkle: Object.freeze({phrases: TWINKLE, beats: TWINKLE.map(() => [1,1,1,1,1,1,2])})
+  birthday: Object.freeze({phrases: BIRTHDAY, beats: [[.75,.25,1,1,1,2],[.75,.25,1,1,1,2],[.75,.25,1,1,1,1,2],[.75,.25,1,1,1,3]], pieces: [[3,3],[3,3],[2,2,3],[3,3]]}),
+  twinkle: Object.freeze({phrases: TWINKLE, beats: TWINKLE.map(() => [1,1,1,1,1,1,2]), pieces: TWINKLE.map(() => [4,3])})
 });
 // The song being played. PHRASES is a live binding: importers always see the current song's lines.
 export let SONG_ID = 'birthday';
@@ -90,14 +90,16 @@ export function validFinalDraft(state,notes,P=PHRASES) {
 }
 export function compatibleSave(saved) {
   if(!saved||typeof saved!=='object'||Array.isArray(saved)||saved.v!==1||!Number.isInteger(saved.stage)||saved.stage<1||saved.stage>5)return false;
-  if(Object.keys(saved).some(k=>!['v','stage','who','state','completedStages','performances','candles','cakeReady','incentive','finalDraft','sound','together','fullscreenPreference','autoMove','songHits','nextStage','playedToday','volume','panelTheme','song'].includes(k)))return false;
+  if(Object.keys(saved).some(k=>!['v','stage','who','state','completedStages','performances','candles','cakeReady','incentive','finalDraft','sound','together','fullscreenPreference','autoMove','songHits','nextStage','playedToday','volume','panelTheme','song','byHeart','copyAt'].includes(k)))return false;
+  if(saved.copyAt!=null&&!validCopyAt(saved.copyAt))return false;
+  if(saved.byHeart!=null&&!(typeof saved.byHeart==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(saved.byHeart)))return false;
   if(saved.song!=null&&!SONGS[saved.song])return false;
   if(saved.volume!=null&&!(typeof saved.volume==='number'&&saved.volume>=0.2&&saved.volume<=1))return false;
   if(saved.panelTheme!=null&&!['auto','light','dark'].includes(saved.panelTheme))return false;
   if(saved.playedToday!=null&&!validPlayedToday(saved.playedToday))return false;
   if(saved.autoMove!=null&&typeof saved.autoMove!=='boolean')return false;
   if(saved.songHits!=null&&!validSongHits(saved.songHits))return false;
-  if(saved.nextStage!=null&&!(saved.nextStage===1||saved.nextStage===2))return false;
+  if(saved.nextStage!=null&&!(Number.isInteger(saved.nextStage)&&saved.nextStage>=1&&saved.nextStage<=4))return false;
   if(saved.sound!=null&&!['sine','triangle','bell'].includes(saved.sound))return false;
   if(saved.together!=null&&typeof saved.together!=='boolean')return false;
   if(saved.fullscreenPreference!=null&&typeof saved.fullscreenPreference!=='boolean')return false;
@@ -134,10 +136,13 @@ export function magicIncentive(previous, expected, played, endOfPhrase = false) 
 
 export function validIncentive(p){return !!p && typeof p==="object" && Object.keys(p).every(k=>["hits","taps","fireflies","lineHits","lineTaps","invite","qualified"].includes(k)) && [p.hits,p.taps,p.fireflies,p.lineHits,p.lineTaps].every(x=>Number.isSafeInteger(x)&&x>=0&&x<=1000000) && p.hits<=p.taps && p.fireflies<=40 && (p.qualified==null||(Number.isSafeInteger(p.qualified)&&p.qualified>=0&&p.qualified<=1000000)) && p.lineHits<=p.lineTaps && typeof p.invite==="boolean"}
 
-// Learning without being taught (Fable call 3, Nov 16). Only stages 1 and 2 move by themselves; stages 3-5 are a grown-up's choice.
-// Up: two full Magic-play songs in a row with at least 80% glowing-key hits. Down: a Glow-follow song where extra help was
-// needed on 3 or more of its 4 lines. Never announced. history = the last stage-1 song hit percents (at most 2).
-export const AUTO_UP_PERCENT = 80, AUTO_UP_SONGS = 2, STUCK_LINES = 3;
+// Learning without being taught (Fable, PIANO_LEARNING_20261116.md). Four steps, each the whole song once, never announced:
+// 1 Magic (any key plays the song), 2 Follow (the song waits for the glowing key), 3 Copy me (the band shows a few notes, she
+// plays them back), 4 By heart (no glow; help fades in after a pause that stretches as she gets better).
+// Up: 1->2 two songs at 80%+ glowing keys; 2->3 two songs with at most three wrong keys and no stall over 4 s; 3->4 two songs
+// where at least three quarters of the lines needed no rescue. Down one step: a song where most lines needed rescue, or more
+// than ten wrong keys. history = the last two results for the current step.
+export const STEPS = 4, AUTO_UP_PERCENT = 80, AUTO_UP_SONGS = 2, STUCK_LINES = 3;
 export function validSongHits(x){return Array.isArray(x)&&x.length<=AUTO_UP_SONGS&&x.every(p=>Number.isInteger(p)&&p>=0&&p<=100)}
 export function autoStageAfterSong(stage, history, song) {
   const recent = validSongHits(history) ? history : [];
@@ -145,11 +150,43 @@ export function autoStageAfterSong(stage, history, song) {
     const next = [...recent, song.hitPercent].slice(-AUTO_UP_SONGS);
     return next.length === AUTO_UP_SONGS && next.every(p => p >= AUTO_UP_PERCENT) ? {stage:2, songHits:[]} : {stage:1, songHits:next};
   }
-  if (stage === 2 && Number.isInteger(song?.helpLines)) return song.helpLines >= STUCK_LINES ? {stage:1, songHits:[]} : {stage:2, songHits:recent};
+  if (stage >= 2 && stage <= STEPS && song && typeof song === 'object') {
+    const lines = Number.isInteger(song.lines) && song.lines > 0 ? song.lines : 4;
+    const rescued = Number.isInteger(song.rescuedLines) ? song.rescuedLines : Number.isInteger(song.helpLines) ? song.helpLines : 0;
+    const wrong = Number.isInteger(song.wrong) ? song.wrong : 0;
+    if (rescued >= STUCK_LINES * lines / 4 || wrong > 10) return {stage:stage - 1, songHits:[]};
+    if (stage === STEPS) return {stage, songHits:recent};
+    const good = stage === 2 ? wrong <= 3 && (Number(song.maxGapMs) || 0) <= 4000 : lines - rescued >= Math.ceil(lines * .75);
+    const next = [...recent, good ? 100 : 0].slice(-AUTO_UP_SONGS);
+    return next.length === AUTO_UP_SONGS && next.every(p => p === 100) ? {stage:stage + 1, songHits:[]} : {stage, songHits:next};
+  }
   return {stage, songHits:recent};
+}
+// Old saves used five stages (3 Colour path, 4 Little hints, 5 By heart). Map them onto the four steps: 3 -> 3, 4 and 5 -> 4.
+export function migrateSave(saved) {
+  if (!saved || typeof saved !== 'object') return saved;
+  const to = n => n === 5 ? 4 : n, out = {...saved};
+  if (out.stage === 5) out.stage = 4;
+  if (out.state && out.state.stage === 5) out.state = {...out.state, stage:4};
+  if (Array.isArray(out.completedStages)) out.completedStages = [...new Set(out.completedStages.map(to))].sort();
+  if (out.performances && typeof out.performances === 'object' && out.performances['5']) { const p = {...out.performances}; if (!p['4']) p['4'] = p['5']; delete p['5']; out.performances = p; }
+  if (out.nextStage === 5) out.nextStage = 4;
+  return out;
 }
 
 // Who she has played the song for today (picker shows them wearing their party hat). Names only, no times.
 // Balk, Nov 16: Ba (grandmother) and the cousins Veer and Ishan are birthday people too.
 export const FAMILY = Object.freeze(['Rayna','Mommy','Daddy','Ba','Grandpa','Veer','Ishan','Valley friend']);
 export function validPlayedToday(x){return !!x&&typeof x==='object'&&!Array.isArray(x)&&Object.keys(x).every(k=>k==='date'||k==='who')&&/^\d{4}-\d{2}-\d{2}$/.test(x.date)&&Array.isArray(x.who)&&x.who.length<=FAMILY.length&&x.who.every(n=>FAMILY.includes(n))&&new Set(x.who).size===x.who.length}
+
+// Step 3 (Copy me): where the piece holding note `note` of line `phrase` starts and ends, at a growth level:
+// 0 = the song's shortest pieces, 1 = half a line, 2 = the whole line.
+export function copyPiece(songId, phrase, note, level = 0) {
+  const song = SONGS[songId] || SONGS.birthday, len = song.phrases[phrase]?.length || 0;
+  if (!len) return null;
+  const sizes = level >= 2 ? [len] : level === 1 ? [Math.ceil(len / 2), len - Math.ceil(len / 2)] : song.pieces[phrase];
+  let start = 0;
+  for (const size of sizes) { if (note < start + size) return {start, end: start + size}; start += size; }
+  return {start: Math.min(note, len - 1), end: len};
+}
+export function validCopyAt(x){return !!x&&typeof x==='object'&&!Array.isArray(x)&&Object.keys(x).every(k=>['phrase','note','level'].includes(k))&&[x.phrase,x.note,x.level].every(Number.isInteger)&&x.phrase>=0&&x.phrase<6&&x.note>=0&&x.note<8&&x.level>=0&&x.level<=2}
