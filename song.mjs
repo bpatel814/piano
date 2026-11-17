@@ -101,7 +101,7 @@ export function compatibleSave(saved) {
   if(saved.sound!=null&&!['sine','triangle','bell'].includes(saved.sound))return false;
   if(saved.together!=null&&typeof saved.together!=='boolean')return false;
   if(saved.fullscreenPreference!=null&&typeof saved.fullscreenPreference!=='boolean')return false;
-  if(saved.who!=null&&!['Rayna','Mommy','Daddy','Grandpa','Valley friend'].includes(saved.who))return false;
+  if(saved.who!=null&&!FAMILY.includes(saved.who))return false;
   if(saved.state!=null&&(!restoreProgress(saved)||saved.state.stage!==saved.stage))return false;
   if(saved.completedStages!=null&&(!Array.isArray(saved.completedStages)||saved.completedStages.some(x=>!Number.isInteger(x)||x<1||x>5)))return false;
   if(saved.performances!=null&&(typeof saved.performances!=='object'||Array.isArray(saved.performances)||Object.entries(saved.performances).some(([k,v])=>!['1','2','3','4','5'].includes(k)||!validPerformance(v))))return false;
@@ -150,5 +150,6 @@ export function autoStageAfterSong(stage, history, song) {
 }
 
 // Who she has played the song for today (picker shows them wearing their party hat). Names only, no times.
-export const FAMILY = Object.freeze(['Rayna','Mommy','Daddy','Grandpa','Valley friend']);
+// Balk, Nov 16: Ba (grandmother) and the cousins Veer and Ishan are birthday people too.
+export const FAMILY = Object.freeze(['Rayna','Mommy','Daddy','Ba','Grandpa','Veer','Ishan','Valley friend']);
 export function validPlayedToday(x){return !!x&&typeof x==='object'&&!Array.isArray(x)&&Object.keys(x).every(k=>k==='date'||k==='who')&&/^\d{4}-\d{2}-\d{2}$/.test(x.date)&&Array.isArray(x.who)&&x.who.length<=FAMILY.length&&x.who.every(n=>FAMILY.includes(n))&&new Set(x.who).size===x.who.length}
